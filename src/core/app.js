@@ -17,8 +17,8 @@
 
   /* ---------------- nav ---------------- */
   function navHTML(kind) {
-    return TABS.map((t) => '<button class="nav-b" id="' + kind + "-" + t.id + '" data-go="' + t.id + '" aria-current="' + (view === t.id ? "page" : "false") + '">' +
-      (kind === "bn" ? P.icon(t.icon) : "") + "<span>" + esc(kind === "bn" && t.short ? t.short : t.name) + "</span></button>").join("");
+    return TABS.map((t) => '<button class="nav-b" id="' + kind + "-" + t.id + '" data-go="' + t.id + '"' + (kind === "tab" ? ' title="' + esc(t.name) + '"' : "") + ' aria-current="' + (view === t.id ? "page" : "false") + '">' +
+      P.icon(t.icon) + "<span>" + esc(kind === "bn" && t.short ? t.short : t.name) + "</span></button>").join("");
   }
   function renderNav() {
     $("#tabs").innerHTML = navHTML("tab");
@@ -33,7 +33,6 @@
     $("#wDp").textContent = fmt(S.dp);
     $("#wCash").textContent = "€0.00";
     $("#wRating").textContent = fmt(P.overall());
-    $("#demoTag").innerHTML = S.age === "minor" ? "Free play<span class=\"tag-long\"> · under 18</span>" : "Demo<span class=\"tag-long\"> · no real money</span>";
   }
   function renderView() {
     const el = $("#view-" + view);
@@ -65,6 +64,41 @@
     const m = P.topModal(); if (m && b.closest(".modal")) m.close();
     P.go(b.dataset.go, b.dataset.anchor);
   });
+  /* desktop sidebar collapse; remembered per browser when storage works */
+  const SB_KEY = "duelgold.sb";
+  function setSidebar(collapsed) {
+    document.documentElement.classList.toggle("sb-collapsed", collapsed);
+    const t = $("#sbToggle");
+    t.setAttribute("aria-expanded", String(!collapsed));
+    t.setAttribute("aria-label", collapsed ? "Expand sidebar" : "Collapse sidebar");
+  }
+  try { setSidebar(window.localStorage.getItem(SB_KEY) === "1"); } catch (e) { setSidebar(false); }
+  $("#sbToggle").addEventListener("click", () => {
+    const collapsed = !document.documentElement.classList.contains("sb-collapsed");
+    setSidebar(collapsed);
+    try { window.localStorage.setItem(SB_KEY, collapsed ? "1" : "0"); } catch (e) { /* ignore */ }
+  });
+  /* top bar: search, filter, sign in / register */
+  const topQ = $("#topQ");
+  function searchGames(q) {
+    P.views.setLibQuery(q);
+    if (view === "games") renderView(); else P.go("games");
+  }
+  topQ.addEventListener("input", () => searchGames(topQ.value));
+  $("#topSearch").addEventListener("submit", (e) => { e.preventDefault(); searchGames(topQ.value); });
+  $("#topSearchBtn").addEventListener("click", () => {
+    P.go("games");
+    const s = $("#libSearch"); if (s) try { s.focus(); } catch (e) { /* ignore */ }
+  });
+  function accountNote() {
+    P.modal({
+      title: "Accounts are coming soon", testId: "account-note",
+      body: '<p class="modal-text">Duel.gold is a demo, so there is nothing to sign in to yet. Your gold, ratings and progress are saved in this browser.</p>',
+      actions: [{ label: "Got it", id: "accountOk", kind: "primary" }],
+    });
+  }
+  $("#signInBtn").addEventListener("click", accountNote);
+  $("#registerBtn").addEventListener("click", accountNote);
   window.addEventListener("hashchange", () => {
     const v = location.hash.slice(1);
     if (VIEWS.includes(v) && v !== view) P.go(v);

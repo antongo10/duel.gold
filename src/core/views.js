@@ -235,6 +235,7 @@
 
   /* ================= Games library ================= */
   const lib = { q: "", cat: "all", favs: false, sort: "popular" };
+  V.setLibQuery = (q) => { lib.q = String(q || ""); };
   V.games = function (el) {
     const games = P.games();
     const cats = (DG.CATEGORIES || []).filter((c) => games.some((g) => g.category === c.id));

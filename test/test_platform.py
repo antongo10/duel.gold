@@ -158,18 +158,17 @@ def test_tabs(page, w):
         check(page.is_visible(f"#view-{t}") and page.evaluate(f"document.querySelector('#view-{t}').children.length") > 0, f"{t} renders")
         no_hscroll(page, f"tab {t} @{w}")
         shot(page, f"{t}-{w}")
-    # nav by clicking (tabs on desktop, bottom nav on phones)
-    prefix = "bn" if w < 720 else "tab"
+    # nav by clicking: the left sidebar is always on screen and fixed (icon rail on narrow screens)
     for t in ["games", "watch", "tournaments", "social", "profile", "home"]:
-        page.click(f"#{prefix}-{t}")
+        page.click(f"#tab-{t}")
         check(not page.is_hidden(f"#view-{t}"), f"nav click {t}")
-    if w < 720:
-        pos = page.evaluate("getComputedStyle(document.querySelector('#bottomNav')).position")
-        check(pos == "fixed", "bottom nav fixed on phone")
-    else:
-        check(page.is_visible("#tabs"), "header tabs on desktop")
-    page.click("#settingsBtn")
-    check(not page.is_hidden("#view-settings"), "settings reachable from top bar")
+    check(page.is_visible("#tabs"), "sidebar visible")
+    pos = page.evaluate("getComputedStyle(document.querySelector('#tabs')).position")
+    check(pos == "fixed", "sidebar fixed")
+    check(page.is_hidden("#bottomNav"), "bottom nav replaced by the sidebar")
+    check(page.is_hidden("#settingsBtn"), "top-bar settings gear hidden for now")
+    page.click("#footSettings")
+    check(not page.is_hidden("#view-settings"), "settings reachable from footer")
     check(page.inner_text("#wCash") == "€0.00", "cash pill shows €0.00")
 
 
@@ -642,7 +641,6 @@ def test_minor(w):
         check(s["age"] == "minor", "minor stored")
         check(page.is_disabled("#dnS-50") and page.is_disabled("#dnS-custom"), "stakes disabled for minors")
         check("under-18" in page.inner_text("#dnBlock").lower(), "minor explanation")
-        check("under 18" in page.evaluate("document.getElementById('demoTag').textContent").lower() and "free play" in page.inner_text("#demoTag").lower(), "free-play tag")
         err = page.evaluate("DGApp.startMatch({game:'sample-tap', stake:50})")
         check("under-18" in err, f"minor stake refused: {err}")
         page.evaluate("DGApp.setSpeed(4)")
@@ -1000,18 +998,15 @@ def test_qa_fixes(page, w):
     # 23. tap targets ≥ 36 px for live-now + footer links
     small = page.evaluate("""[...document.querySelectorAll('#liveList .link, .foot a, #bottomNav .nav-b, #settingsBtn')].filter(e => e.offsetParent).map(e => e.getBoundingClientRect()).filter(r => r.height < 36).length""")
     check(small == 0, f"{small} small tap targets")
-    if w <= 400:
-        gear = page.evaluate("[document.getElementById('settingsBtn').getBoundingClientRect().top, document.querySelector('.logo').getBoundingClientRect().top]")
-        check(abs(gear[0] - gear[1]) < 20, f"settings gear sits on the logo row {gear}")
     # 22. copy
-    check(w > 720 or ("tournaments" in page.inner_text("#bottomNav").lower() and page.evaluate("[...document.querySelectorAll('#bottomNav .nav-b span')].every(s => s.scrollWidth <= s.clientWidth + 1)")), "bottom nav says Tournaments, unclipped")
+    check(page.get_attribute("#tab-tournaments", "title") == "Tournaments", "sidebar says Tournaments")
     check("Cups" not in page.inner_text("body"), "no 'Cups'")
     page.evaluate("DGApp.go('tournaments')")
     t = page.inner_text("[data-tour=weekend]")
     check(t.count("20,000") <= 1 and "added by the house" in t, "added prize said once")
     page.evaluate("DGApp.go('games')")
     check("Favorites" not in page.inner_text("body"), "British spelling: favourites")
-    check(page.evaluate("getComputedStyle(document.querySelector('.logo')).fontFamily").find("Roboto Condensed") >= 0, "condensed display fallbacks")
+    check(page.evaluate("getComputedStyle(document.querySelector('.logo')).fontFamily").find("Inter") >= 0, "logo uses Inter")
     # clean up test games
     page.evaluate("DG.games.splice(0, DG.games.length, ...DG.games.filter(g => g.id.startsWith('sample-'))); DGApp.refresh()")
     check(console_errors(page) == [], f"console errors: {console_errors(page)}")
@@ -1203,8 +1198,7 @@ def test_ux_round3(page, w):
     check("title-sharp" in st(page)["cos"]["owned"], "buy still works")
 
     # 5: header tag readable
-    tag = page.inner_text("#demoTag").lower()
-    check("demo" in tag and "real money" in tag, f"header tag full text at {w}: {tag}")
+    check(page.query_selector("#demoTag") is None and page.query_selector("#topFilter") is None, f"no demo tag or filter button at {w}")
     no_hscroll(page, f"header @{w}")
     # 8: About link ≥ 40 px, card eyebrows on one line
     page.evaluate("DGApp.go('settings')")
