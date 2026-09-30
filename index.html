@@ -1,0 +1,839 @@
+<title>Duel.gold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* Layout: arena lobby — sticky wallet header, tabbed views, full-screen duel overlay. Deliberately single dark "arena" look. */
+:root{
+  --ink:#10111F;          /* page ground */
+  --panel:#181A2E;        /* raised surfaces */
+  --panel-2:#212440;      /* inputs, chips */
+  --line:#30345A;         /* hairlines */
+  --fg:#EEEAF7;           /* primary text */
+  --muted:#9D9BC0;        /* secondary text */
+  --gold:#F2C14E;         /* you, money, primary action */
+  --gold-deep:#B9892B;
+  --rival:#FF6275;        /* opponent */
+  --good:#5AD690;
+  --warn:#FFB35C;
+  --f-display:"Big Shoulders Display","Arial Narrow",Impact,sans-serif;
+  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5;padding-inline:16px;padding-block:0 48px;
+  background:radial-gradient(1200px 500px at 70% -200px,#2A2350 0%,transparent 60%),var(--ink)}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+.wrap{max-width:1120px;margin-inline:auto}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.muted{color:var(--muted)}
+h1,h2,h3{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.02em;margin:0;text-wrap:balance;line-height:1}
+.eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+
+/* Header */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:color-mix(in srgb,var(--ink) 88%,transparent);
+  backdrop-filter:blur(10px);border-bottom:1px solid var(--line);margin-inline:-16px;padding-inline:16px}
+.top-row{display:flex;align-items:center;gap:16px;flex-wrap:wrap;padding-block:12px}
+.logo{font-family:var(--f-display);font-weight:900;font-size:28px;letter-spacing:.01em;text-transform:uppercase;display:flex;align-items:baseline}
+.logo b{color:var(--gold)}
+.demo-tag{font-size:11px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--warn);border:1px solid color-mix(in srgb,var(--warn) 50%,transparent);border-radius:4px;padding:2px 6px}
+.wallet{margin-left:auto;display:flex;gap:8px;flex-wrap:wrap}
+.pill{display:flex;flex-direction:column;background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:4px 10px;min-width:92px}
+.pill span:first-child{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+.pill span:last-child{font-family:var(--f-mono);font-weight:700;font-size:15px}
+.pill.gold span:last-child{color:var(--gold)}
+nav.tabs{display:flex;gap:4px;overflow-x:auto;padding-bottom:8px}
+nav.tabs button{background:none;border:0;padding:8px 14px;border-radius:6px;font-weight:600;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;font-size:13px;white-space:nowrap}
+nav.tabs button[aria-selected="true"]{color:var(--ink);background:var(--gold)}
+
+main{padding-top:24px}
+.view{display:grid;gap:24px}
+
+/* Duel Now */
+.hero{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(0,1fr);gap:24px;align-items:stretch}
+@media (max-width:820px){.hero{grid-template-columns:1fr}}
+.duel-now{background:linear-gradient(160deg,#262249 0%,var(--panel) 55%);border:1px solid var(--line);border-radius:14px;padding:24px;display:grid;gap:18px;position:relative;overflow:hidden}
+.duel-now::after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;
+  background:radial-gradient(circle,color-mix(in srgb,var(--gold) 28%,transparent),transparent 70%);pointer-events:none}
+.duel-now h1{font-size:clamp(44px,8vw,76px);font-weight:900}
+.duel-now h1 em{font-style:normal;color:var(--gold)}
+.tagline{color:var(--muted);max-width:44ch;margin:6px 0 0}
+.field{display:grid;gap:8px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{background:var(--panel-2);border:1px solid var(--line);border-radius:6px;padding:7px 12px;font-weight:600;font-size:14px}
+.chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--panel-2))}
+.chip:disabled{opacity:.35;cursor:not-allowed}
+.cta{background:var(--gold);color:#1A1406;border:0;border-radius:10px;padding:16px 22px;font-family:var(--f-display);font-weight:900;font-size:26px;letter-spacing:.04em;text-transform:uppercase;
+  display:flex;justify-content:space-between;align-items:center;gap:12px;box-shadow:0 6px 0 var(--gold-deep);transition:transform .08s,box-shadow .08s}
+.cta:hover{filter:brightness(1.05)}
+.cta:active{transform:translateY(4px);box-shadow:0 2px 0 var(--gold-deep)}
+.cta small{font-family:var(--f-body);font-size:13px;font-weight:600;text-transform:none;letter-spacing:0;opacity:.8}
+.fine{font-size:12px;color:var(--muted)}
+
+.side{display:grid;gap:16px;align-content:start}
+.box{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+.box h3{font-size:20px;font-weight:800;margin-bottom:10px;display:flex;justify-content:space-between;align-items:baseline;gap:8px}
+.live-dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--rival);margin-right:6px;animation:pulse 1.4s infinite}
+@keyframes pulse{50%{opacity:.3}}
+.rowlist{display:grid}
+.rowlist > div{display:flex;justify-content:space-between;gap:12px;padding:7px 0;border-top:1px solid var(--line)}
+.rowlist > div:first-child{border-top:0}
+.rowlist button.link{background:none;border:0;padding:0;font-weight:600;text-align:left}
+.rowlist button.link:hover{color:var(--gold)}
+
+.feed div{font-size:13px}
+.feed .w{color:var(--gold);font-weight:600}
+
+/* Game cards */
+.section-head{display:flex;justify-content:space-between;align-items:end;gap:12px;flex-wrap:wrap}
+.section-head h2{font-size:34px;font-weight:900}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;display:grid;gap:10px;grid-template-rows:auto auto 1fr auto auto}
+.card .cat{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.card h3{font-size:26px;font-weight:800}
+.card p{margin:0;color:var(--muted);font-size:14px}
+.card.soon{opacity:.62}
+.meter{display:grid;grid-template-columns:44px 1fr;gap:8px;align-items:center;font-size:12px;color:var(--muted)}
+.segs{display:grid;grid-template-columns:repeat(10,1fr);gap:2px}
+.segs i{height:7px;border-radius:1px;background:var(--panel-2)}
+.segs.skill i.on{background:var(--gold)}
+.segs.luck i.on{background:var(--rival)}
+.card-foot{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.btn{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:8px 14px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px}
+.btn.primary{background:var(--gold);border-color:var(--gold);color:#1A1406}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* Tournaments */
+.tour{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:12px;align-items:center}
+.tour + .tour{border-top:1px solid var(--line);padding-top:14px;margin-top:14px}
+.tour h3{font-size:22px;margin:0}
+.prize{font-family:var(--f-mono);font-weight:700;color:var(--gold)}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:7px 8px;border-top:1px solid var(--line)}
+th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;border-top:0}
+td.num,th.num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+tr.me td{color:var(--gold);font-weight:700}
+.scroll-x{overflow-x:auto}
+
+/* Profile */
+.stats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+.stat{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.stat b{display:block;font-family:var(--f-mono);font-size:24px}
+.win{color:var(--good)} .loss{color:var(--rival)}
+
+.fair{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.fair div{border-left:2px solid var(--gold);padding-left:12px}
+.fair b{display:block;font-weight:700}
+.fair span{color:var(--muted);font-size:14px}
+
+/* Overlay */
+.overlay{position:fixed;inset:0;z-index:50;background:var(--ink);overflow-y:auto;
+  padding:calc(env(safe-area-inset-top,0px) + 12px) 16px calc(env(safe-area-inset-bottom,0px) + 24px)}
+.ov-inner{max-width:760px;margin-inline:auto;display:grid;gap:16px}
+.vsbar{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:10px 14px}
+.who{display:grid;min-width:0}
+.who b{font-family:var(--f-display);font-size:22px;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.who.me b{color:var(--gold)} .who.opp{text-align:right} .who.opp b{color:var(--rival)}
+.who span{font-size:12px;color:var(--muted)}
+.clock{font-family:var(--f-mono);font-size:22px;font-weight:700;text-align:center;min-width:72px}
+.ov-meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:13px;color:var(--muted)}
+.ov-meta button{background:none;border:0;color:var(--muted);text-decoration:underline;padding:0}
+#stage{min-height:360px}
+
+/* Matchmaking */
+.mm{display:grid;place-items:center;text-align:center;gap:14px;padding-block:60px}
+.radar{width:120px;height:120px;border-radius:50%;border:2px solid var(--line);position:relative;overflow:hidden}
+.radar::before{content:"";position:absolute;inset:0;background:conic-gradient(from 0deg,color-mix(in srgb,var(--gold) 55%,transparent),transparent 30%);animation:spin 1.1s linear infinite}
+@keyframes spin{to{transform:rotate(1turn)}}
+.versus{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:16px;padding-block:50px;text-align:center}
+.versus .vs{font-family:var(--f-display);font-weight:900;font-size:64px;color:var(--muted)}
+.versus b{font-family:var(--f-display);font-size:clamp(28px,6vw,44px);text-transform:uppercase;display:block;overflow-wrap:anywhere}
+.versus .l b{color:var(--gold)} .versus .r b{color:var(--rival)}
+
+/* Reaction */
+.pad{width:100%;aspect-ratio:16/9;max-width:100%;border-radius:14px;border:0;display:grid;place-items:center;font-family:var(--f-display);font-weight:900;font-size:clamp(36px,9vw,72px);text-transform:uppercase;letter-spacing:.03em;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+.pad.ready{background:var(--panel-2);color:var(--fg)}
+.pad.wait{background:#3A1520;color:var(--rival)}
+.pad.go{background:var(--gold);color:#1A1406}
+.pad.done{background:var(--panel);color:var(--muted)}
+.pad small{display:block;font-family:var(--f-body);font-size:15px;font-weight:600;text-transform:none;letter-spacing:0;margin-top:6px}
+
+/* Rush */
+.problem{font-family:var(--f-mono);font-weight:700;font-size:clamp(40px,10vw,72px);text-align:center;padding-block:28px;background:var(--panel);border:1px solid var(--line);border-radius:14px}
+.answers{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.answers button{background:var(--panel-2);border:1px solid var(--line);border-radius:10px;padding:18px;font-family:var(--f-mono);font-size:26px;font-weight:700;display:flex;justify-content:space-between;align-items:center}
+.answers button kbd{font-size:12px;color:var(--muted);font-family:var(--f-mono)}
+.answers button.right{border-color:var(--good);color:var(--good)}
+.answers button.wrong{border-color:var(--rival);color:var(--rival)}
+.race{display:grid;gap:6px}
+.race-row{display:grid;grid-template-columns:70px 1fr 64px;gap:8px;align-items:center;font-size:13px}
+.bar{height:10px;background:var(--panel-2);border-radius:5px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;transition:width .3s}
+.bar.me i{background:var(--gold)} .bar.opp i{background:var(--rival)}
+
+/* Memory */
+.mem{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;max-width:420px;margin-inline:auto;width:100%}
+.mem button{aspect-ratio:1;border-radius:12px;border:1px solid var(--line);background:var(--panel-2);transition:background .12s,transform .08s}
+.mem button.lit{background:var(--gold);transform:scale(.96)}
+.mem button.bad{background:var(--rival)}
+.mem.locked button{cursor:default}
+.center-note{text-align:center;font-weight:600}
+
+/* City */
+.city-wrap{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:16px}
+@media (max-width:700px){.city-wrap{grid-template-columns:1fr}}
+.tools{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:6px}
+.tool{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:6px 8px;text-align:left;font-size:12px;display:grid;gap:1px}
+.tool b{font-size:13px}
+.tool[aria-pressed="true"]{border-color:var(--gold);background:color-mix(in srgb,var(--gold) 14%,var(--panel-2))}
+.tool:disabled{opacity:.4;cursor:not-allowed}
+.board{display:grid;grid-template-columns:repeat(6,1fr);gap:3px;background:var(--line);padding:3px;border-radius:10px;max-width:100%}
+.board.small{gap:2px;padding:2px;border-radius:6px}
+.cell{aspect-ratio:1;border:0;border-radius:4px;background:#1B2A24;display:grid;place-items:center;font-family:var(--f-mono);font-size:clamp(9px,2.2vw,13px);font-weight:700;color:#0E1116;padding:0}
+.board.small .cell{border-radius:2px;font-size:8px}
+.cell.x{background:repeating-linear-gradient(45deg,#1E3A5C 0 5px,#244670 5px 10px);cursor:not-allowed}
+.cell.res{background:#7FB7FF} .cell.com{background:#C49BFF} .cell.ind{background:#9A8F80}
+.cell.park{background:#5AD690} .cell.pwr{background:var(--gold)} .cell.sch{background:#FF9E6B}
+.cell.unpowered{opacity:.5}
+.cstats{display:grid;gap:4px;font-size:13px}
+.cstats div{display:flex;justify-content:space-between;gap:8px}
+.cstats b{font-family:var(--f-mono)}
+.big-score{font-family:var(--f-mono);font-size:34px;font-weight:700;color:var(--gold)}
+.legend{display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted)}
+.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:4px;vertical-align:-1px}
+
+/* Result */
+.result{display:grid;gap:18px;text-align:center;padding-top:10px}
+.result h2{font-size:clamp(56px,14vw,110px);font-weight:900}
+.result h2.win{color:var(--gold)} .result h2.loss{color:var(--rival)} .result h2.draw{color:var(--fg)}
+.scoreline{display:flex;justify-content:center;gap:18px;align-items:baseline;font-family:var(--f-mono);font-size:30px;font-weight:700}
+.scoreline .me{color:var(--gold)} .scoreline .opp{color:var(--rival)}
+.payout{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;text-align:left}
+.actions{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+.detail{text-align:left}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+@media (max-width:520px){.cmp{grid-template-columns:1fr}}
+
+footer{margin-top:36px;padding-top:16px;border-top:1px solid var(--line);font-size:12px;color:var(--muted);max-width:80ch}
+
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="wrap">
+      <div class="top-row">
+        <div class="logo">Duel<b>.gold</b></div>
+        <span class="demo-tag">Demo gold · no real money</span>
+        <div class="wallet">
+          <div class="pill gold"><span>Gold</span><span id="wGold">0</span></div>
+          <div class="pill"><span>Duel points</span><span id="wDp">0</span></div>
+          <div class="pill"><span>Rating</span><span id="wRating">0</span></div>
+        </div>
+      </div>
+      <nav class="tabs" role="tablist">
+        <button role="tab" data-view="arena" aria-selected="true">Arena</button>
+        <button role="tab" data-view="games" aria-selected="false">Games</button>
+        <button role="tab" data-view="tournaments" aria-selected="false">Tournaments</button>
+        <button role="tab" data-view="profile" aria-selected="false">Profile</button>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <!-- ARENA -->
+    <section class="view" id="view-arena">
+      <div class="hero">
+        <div class="duel-now">
+          <div>
+            <div class="eyebrow">Every game. One opponent. One winner.</div>
+            <h1>Duel <em>now</em></h1>
+            <p class="tagline">Same seed, same conditions for both players. The better player takes the pot.</p>
+          </div>
+          <div class="field">
+            <span class="eyebrow">Game</span>
+            <div class="chips" id="pickGame"></div>
+          </div>
+          <div class="field">
+            <span class="eyebrow">Stake (gold)</span>
+            <div class="chips" id="pickStake"></div>
+          </div>
+          <button class="cta" id="duelBtn"><span>Find opponent</span><small id="duelSub">Free · 1v1</small></button>
+          <div class="fine" id="potNote"></div>
+        </div>
+
+        <div class="side">
+          <div class="box">
+            <h3><span><span class="live-dot"></span>Live now</span><span class="eyebrow">Playing</span></h3>
+            <div class="rowlist" id="liveList"></div>
+          </div>
+          <div class="box">
+            <h3><span>Recent duels</span><span class="eyebrow">Simulated</span></h3>
+            <div class="rowlist feed" id="feed"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="box">
+        <h3><span>How every duel stays fair</span></h3>
+        <div class="fair">
+          <div><b>Identical seed</b><span>Both players get the same puzzle, map or timing.</span></div>
+          <div><b>Skill vs luck shown</b><span>Every game card rates how much skill decides the result.</span></div>
+          <div><b>Matched by rating</b><span>You face players near your own rating in each game.</span></div>
+          <div><b>10% platform fee</b><span>Winner takes 1.8× the stake. A draw refunds both players.</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- GAMES -->
+    <section class="view" id="view-games" hidden>
+      <div class="section-head">
+        <h2>Game library</h2>
+        <span class="muted">4 playable · more in development</span>
+      </div>
+      <div class="grid" id="gameGrid"></div>
+    </section>
+
+    <!-- TOURNAMENTS -->
+    <section class="view" id="view-tournaments" hidden>
+      <div class="section-head">
+        <h2>Tournaments</h2>
+        <span class="muted">Free entry · prize pools funded by the house</span>
+      </div>
+      <div class="box" id="tourList"></div>
+      <div class="box">
+        <h3><span>Daily Number Rush Cup · leaderboard</span><span class="eyebrow">Today's seed</span></h3>
+        <div class="scroll-x"><table id="lb"></table></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="view" id="view-profile" hidden>
+      <div class="section-head">
+        <h2>Your profile</h2>
+        <button class="btn" id="resetBtn">Reset demo</button>
+      </div>
+      <div class="stats" id="statTiles"></div>
+      <div class="box">
+        <h3><span>Rating by game</span></h3>
+        <div class="scroll-x"><table id="ratingTable"></table></div>
+      </div>
+      <div class="box">
+        <h3><span>Match history</span></h3>
+        <div class="scroll-x"><table id="histTable"></table></div>
+      </div>
+      <p class="fine" id="resetConfirm" hidden></p>
+    </section>
+
+    <footer>
+      Duel.gold prototype. Balances are demo gold with no cash value, opponents are simulated, and scores are calculated in your browser.
+      A real-money version would need server-side score verification, 18+ age and identity checks, UK-only geofencing, a gaming-friendly payment processor and specialist legal review of the entry and prize structure before launch.
+    </footer>
+  </main>
+</div>
+
+<!-- DUEL OVERLAY -->
+<div class="overlay" id="overlay" hidden>
+  <div class="ov-inner">
+    <div class="vsbar" id="vsbar" hidden>
+      <div class="who me"><b id="meName">You</b><span id="meSub"></span></div>
+      <div class="clock" id="clock">--</div>
+      <div class="who opp"><b id="oppName">Rival</b><span id="oppSub"></span></div>
+    </div>
+    <div class="ov-meta" id="ovMeta" hidden>
+      <span id="seedNote"></span>
+      <button id="forfeitBtn">Forfeit</button>
+    </div>
+    <div id="stage"></div>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+/* ---------- Data ---------- */
+const GAMES = [
+  {id:'reaction', name:'Reaction Duel', cat:'Reflex', fmt:'1v1 · best of 5', time:'~40 s', skill:8, luck:2, playing:1204, playable:true,
+   desc:'Tap the instant the pad turns gold. Early taps are a foul.'},
+  {id:'rush', name:'Number Rush', cat:'Numbers', fmt:'1v1 · same problems', time:'40 s', skill:9, luck:1, playing:987, playable:true,
+   desc:'Mental arithmetic race. Identical problem set for both players.'},
+  {id:'memory', name:'Memory Duel', cat:'Brain', fmt:'1v1 · same sequence', time:'1–3 min', skill:9, luck:1, playing:642, playable:true,
+   desc:'Repeat the flashing sequence. It grows by one each level.'},
+  {id:'city', name:'City Duel', cat:'Builder', fmt:'1v1 · same map', time:'60 s build', skill:9, luck:1, playing:821, playable:true,
+   desc:'$10,000 and a 6×6 plot. Build the highest-scoring city.'},
+  {id:'base', name:'Base Duel', cat:'Battle', fmt:'1v1 · same waves', time:'4 min', skill:9, luck:1, playing:0,
+   desc:'Build defences, then hold your base against identical zombie waves.'},
+  {id:'chess', name:'Chess Blitz', cat:'Strategy', fmt:'1v1 · 3+2', time:'5–8 min', skill:10, luck:0, playing:0,
+   desc:'Classic chess on a fast clock.'},
+  {id:'groups', name:'Word Groups', cat:'Word', fmt:'1v1 · same grid', time:'2 min', skill:8, luck:2, playing:0,
+   desc:'Sort 16 words into four hidden groups before your rival.'},
+  {id:'auction', name:'Auction Duel', cat:'Social', fmt:'1v1 · sealed bids', time:'3 min', skill:7, luck:3, playing:0,
+   desc:'Bid on assets with hidden values. Highest net worth wins.'},
+  {id:'pool', name:'Pool', cat:'Precision', fmt:'1v1 · 8-ball', time:'5 min', skill:8, luck:2, playing:0,
+   desc:'Physics pool with a shared break seed.'},
+  {id:'liars', name:"Liar's Dice", cat:'Dice', fmt:'1v1 · 5 dice', time:'4 min', skill:5, luck:5, playing:0,
+   desc:'Bluff and call. High luck share, so free play only.'}
+];
+const PLAYABLE = GAMES.filter(g=>g.playable);
+const STAKES = [0,100,250,500,1000,2500];
+const NAMES = ['Mira','Kofi','Anya','Tomasz','Leila','Dev','Sven','Yuki','Ines','Obi','Marta','Rafa','Chloe','Arjun','Nadia','Elio','Hana','Viktor','Sade','Jonah'];
+const RAKE = 0.10;
+
+const DEFAULT = ()=>({gold:12420, dp:8421, rating:{reaction:1340,rush:1285,memory:1310,city:1250}, wins:0, losses:0, draws:0, streak:0, history:[], best:{}, joined:{}});
+let S = DEFAULT();
+try{ const raw = localStorage.getItem('duelgold.v1'); if(raw){ S = Object.assign(DEFAULT(), JSON.parse(raw)); } }catch(e){}
+function save(){ try{ localStorage.setItem('duelgold.v1', JSON.stringify(S)); }catch(e){} }
+
+const $ = s=>document.querySelector(s);
+const fmt = n=>Math.round(n).toLocaleString('en-GB');
+const esc = s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+function mulberry32(a){return function(){a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const overall = ()=>Math.round(Object.values(S.rating).reduce((a,b)=>a+b,0)/Object.keys(S.rating).length);
+
+/* ---------- Wallet / nav ---------- */
+function renderWallet(){
+  $('#wGold').textContent = fmt(S.gold);
+  $('#wDp').textContent = fmt(S.dp);
+  $('#wRating').textContent = fmt(overall());
+}
+document.querySelectorAll('nav.tabs button').forEach(b=>b.addEventListener('click',()=>showView(b.dataset.view)));
+function showView(v){
+  document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-selected', String(b.dataset.view===v)));
+  document.querySelectorAll('main .view').forEach(s=>s.hidden = s.id!=='view-'+v);
+  if(v==='profile') renderProfile();
+  if(v==='tournaments') renderTournaments();
+  if(v==='games') renderGames();
+  renderArena();
+}
+
+/* ---------- Arena ---------- */
+let pick = {game:'any', stake:0};
+function renderArena(){
+  const gp = $('#pickGame');
+  gp.innerHTML = [{id:'any',name:'Surprise me'}].concat(PLAYABLE).map(g=>
+    `<button class="chip" data-g="${g.id}" aria-pressed="${pick.game===g.id}">${esc(g.name)}</button>`).join('');
+  gp.querySelectorAll('button').forEach(b=>b.onclick=()=>{pick.game=b.dataset.g; renderArena();});
+  const sp = $('#pickStake');
+  sp.innerHTML = STAKES.map(s=>`<button class="chip mono" data-s="${s}" aria-pressed="${pick.stake===s}" ${s>S.gold?'disabled':''}>${s?fmt(s):'Free'}</button>`).join('');
+  sp.querySelectorAll('button').forEach(b=>b.onclick=()=>{pick.stake=+b.dataset.s; renderArena();});
+  if(pick.stake>S.gold) pick.stake=0;
+  $('#duelSub').textContent = (pick.stake? fmt(pick.stake)+' gold':'Free') + ' · 1v1';
+  $('#potNote').textContent = pick.stake
+    ? `Pot ${fmt(pick.stake*2)} gold · winner receives ${fmt(pick.stake*2*(1-RAKE))} after the 10% fee.`
+    : 'Free duel. Rating and duel points only.';
+  renderLive();
+}
+function renderLive(){
+  $('#liveList').innerHTML = PLAYABLE.map(g=>
+    `<div><button class="link" data-g="${g.id}">${esc(g.name)}</button><span class="mono muted">${fmt(g.playing)}</span></div>`).join('');
+  $('#liveList').querySelectorAll('button').forEach(b=>b.onclick=()=>{pick.game=b.dataset.g; renderArena(); $('#duelBtn').focus();});
+}
+setInterval(()=>{PLAYABLE.forEach(g=>g.playing=Math.max(80,g.playing+Math.round((Math.random()-.5)*30))); if(!$('#view-arena').hidden) renderLive();},4000);
+
+const feedItems=[];
+function pushFeed(){
+  const r=Math.random, a=NAMES[Math.floor(r()*NAMES.length)]; let b=NAMES[Math.floor(r()*NAMES.length)]; if(b===a) b='Luca';
+  const g=PLAYABLE[Math.floor(r()*PLAYABLE.length)], s=STAKES[1+Math.floor(r()*4)];
+  feedItems.unshift(`<div><span><span class="w">${a}</span> beat ${b} · ${g.name}</span><span class="mono muted">${fmt(s*2*(1-RAKE))}</span></div>`);
+  feedItems.length=Math.min(feedItems.length,5);
+  $('#feed').innerHTML=feedItems.join('');
+}
+for(let i=0;i<5;i++) pushFeed();
+setInterval(pushFeed,5200);
+
+$('#duelBtn').onclick=()=>{
+  const gid = pick.game==='any' ? PLAYABLE[Math.floor(Math.random()*PLAYABLE.length)].id : pick.game;
+  startDuel(gid, pick.stake);
+};
+
+/* ---------- Game library ---------- */
+function meter(n,cls){return `<div class="segs ${cls}">${Array.from({length:10},(_,i)=>`<i class="${i<n?'on':''}"></i>`).join('')}</div>`;}
+function renderGames(){
+  $('#gameGrid').innerHTML = GAMES.map(g=>`
+    <article class="card ${g.playable?'':'soon'}">
+      <div class="cat">${esc(g.cat)} · ${esc(g.fmt)}</div>
+      <h3>${esc(g.name)}</h3>
+      <p>${esc(g.desc)}</p>
+      <div style="display:grid;gap:4px">
+        <div class="meter"><span>Skill</span>${meter(g.skill,'skill')}</div>
+        <div class="meter"><span>Luck</span>${meter(g.luck,'luck')}</div>
+      </div>
+      <div class="card-foot">
+        <span class="fine">${g.playable? fmt(g.playing)+' playing · '+esc(g.time) : 'In development'}</span>
+        ${g.playable?`<button class="btn primary" data-g="${g.id}">Duel</button>`:`<button class="btn" disabled>Soon</button>`}
+      </div>
+    </article>`).join('');
+  $('#gameGrid').querySelectorAll('button[data-g]').forEach(b=>b.onclick=()=>startDuel(b.dataset.g, pick.stake));
+}
+
+/* ---------- Tournaments ---------- */
+function msToMidnight(){const n=new Date(),m=new Date(n);m.setHours(24,0,0,0);return m-n;}
+function hms(ms){const s=Math.floor(ms/1000);return [Math.floor(s/3600),Math.floor(s%3600/60),s%60].map(v=>String(v).padStart(2,'0')).join(':');}
+const TOURS=[
+  {id:'rushcup', game:'rush', name:'Daily Number Rush Cup', pool:5000, players:1842},
+  {id:'citycup', game:'city', name:'City Duel Weekend Open', pool:20000, players:2184},
+  {id:'reflex', game:'reaction', name:'Reflex Sprint', pool:2500, players:611},
+  {id:'mem', game:'memory', name:'Memory Masters', pool:3000, players:734}
+];
+function renderTournaments(){
+  $('#tourList').innerHTML = TOURS.map(t=>`
+    <div class="tour">
+      <div>
+        <div class="eyebrow">${esc(GAMES.find(g=>g.id===t.game).name)} · free entry · ends in <span class="mono" data-cd>${hms(msToMidnight())}</span></div>
+        <h3>${esc(t.name)}</h3>
+        <div class="fine"><span class="prize">${fmt(t.pool)} gold</span> pool · ${fmt(t.players+(S.joined[t.id]?1:0))} entrants${S.best[t.game]!=null?` · your best ${fmt(S.best[t.game])}`:''}</div>
+      </div>
+      <button class="btn primary" data-t="${t.id}">${S.joined[t.id]?'Play again':'Enter free'}</button>
+    </div>`).join('');
+  $('#tourList').querySelectorAll('button').forEach(b=>b.onclick=()=>{
+    const t=TOURS.find(x=>x.id===b.dataset.t); S.joined[t.id]=true; save(); startDuel(t.game,0,{tournament:t});
+  });
+  const rng=mulberry32(dayKey());
+  const rows=NAMES.slice(0,9).map(n=>({n, s:Math.round(1400+rng()*1900)}));
+  if(S.best.rush!=null) rows.push({n:'You', s:S.best.rush, me:true});
+  rows.sort((a,b)=>b.s-a.s);
+  $('#lb').innerHTML = `<tr><th>#</th><th>Player</th><th class="num">Score</th><th class="num">Prize</th></tr>` +
+    rows.map((r,i)=>`<tr class="${r.me?'me':''}"><td class="mono">${i+1}</td><td>${esc(r.n)}</td><td class="num">${fmt(r.s)}</td><td class="num">${i<3?fmt([2500,1500,1000][i]):'–'}</td></tr>`).join('') +
+    (S.best.rush==null?`<tr><td colspan="4" class="muted">Enter the cup to post a score for today's seed.</td></tr>`:'');
+}
+function dayKey(){const d=new Date();return d.getFullYear()*10000+(d.getMonth()+1)*100+d.getDate();}
+setInterval(()=>document.querySelectorAll('[data-cd]').forEach(e=>e.textContent=hms(msToMidnight())),1000);
+
+/* ---------- Profile ---------- */
+function renderProfile(){
+  const total=S.wins+S.losses+S.draws;
+  const tiles=[['Overall rating',fmt(overall())],['Win rate',total?Math.round(S.wins/total*100)+'%':'–'],['Record',`${S.wins}–${S.losses}–${S.draws}`],['Current streak',String(S.streak)],['Duel points',fmt(S.dp)],['Games played',String(total)]];
+  $('#statTiles').innerHTML=tiles.map(t=>`<div class="stat"><span class="eyebrow">${t[0]}</span><b>${t[1]}</b></div>`).join('');
+  $('#ratingTable').innerHTML=`<tr><th>Game</th><th class="num">Rating</th><th>Division</th><th class="num">Best score</th></tr>`+
+    PLAYABLE.map(g=>`<tr><td>${esc(g.name)}</td><td class="num">${fmt(S.rating[g.id])}</td><td>${division(S.rating[g.id])}</td><td class="num">${S.best[g.id]!=null?fmt(S.best[g.id]):'–'}</td></tr>`).join('');
+  $('#histTable').innerHTML=`<tr><th>Result</th><th>Game</th><th>Opponent</th><th class="num">Score</th><th class="num">Gold</th><th class="num">Rating</th></tr>`+
+    (S.history.length?S.history.slice(0,15).map(h=>`<tr><td class="${h.res}">${h.res.toUpperCase()}</td><td>${esc(h.game)}</td><td>${esc(h.opp)}</td><td class="num">${h.my} – ${h.op}</td><td class="num ${h.gold>0?'win':h.gold<0?'loss':''}">${h.gold>0?'+':''}${fmt(h.gold)}</td><td class="num">${h.dr>0?'+':''}${h.dr}</td></tr>`).join('')
+    :`<tr><td colspan="6" class="muted">No duels yet. Press Find opponent in the Arena to play your first.</td></tr>`);
+}
+function division(r){return r>=1700?'Master':r>=1550?'Diamond':r>=1400?'Gold':r>=1250?'Silver':'Bronze';}
+$('#resetBtn').onclick=()=>{
+  const c=$('#resetConfirm');
+  if(c.hidden){c.hidden=false;c.innerHTML='Reset gold, ratings and history? <button class="btn" id="resetYes">Yes, reset</button>';
+    $('#resetYes').onclick=()=>{S=DEFAULT();save();c.hidden=true;renderWallet();renderProfile();};}
+};
+
+/* ---------- Duel engine ---------- */
+let timers=[], keyHandler=null, current=null;
+function T(fn,ms){const id=setTimeout(fn,ms);timers.push(id);return id;}
+function I(fn,ms){const id=setInterval(fn,ms);timers.push(id);return id;}
+function clearAll(){timers.forEach(id=>{clearTimeout(id);clearInterval(id);});timers=[];if(keyHandler){document.removeEventListener('keydown',keyHandler);keyHandler=null;}}
+function onKey(fn){if(keyHandler)document.removeEventListener('keydown',keyHandler);keyHandler=fn;document.addEventListener('keydown',fn);}
+const stage=()=>$('#stage');
+function setClock(t){$('#clock').textContent=t;}
+
+function startDuel(gid, stake, opts={}){
+  if(stake>S.gold) stake=0;
+  const game=GAMES.find(g=>g.id===gid);
+  const my=S.rating[gid];
+  const seed=Math.floor(Math.random()*900000)+100000;
+  const r=mulberry32(seed);
+  const opp={name:NAMES[Math.floor(r()*NAMES.length)], rating:Math.round(my+(r()-.5)*120)};
+  S.gold-=stake; save(); renderWallet();
+  current={game,stake,seed,opp,opts,ended:false};
+  clearAll();
+  $('#overlay').hidden=false; document.body.style.overflow='hidden';
+  $('#vsbar').hidden=true; $('#ovMeta').hidden=true;
+  stage().innerHTML=`<div class="mm"><div class="radar"></div><h2 style="font-size:32px">Finding opponent</h2>
+    <div class="muted">${esc(game.name)} · ${stake?fmt(stake)+' gold':'Free'} · rating ${fmt(my)} ± 60</div></div>`;
+  T(()=>{
+    stage().innerHTML=`<div class="versus"><div class="l"><span class="eyebrow">You · ${fmt(my)}</span><b>You</b></div><div class="vs">VS</div>
+      <div class="r"><span class="eyebrow">${esc(opp.name)} · ${fmt(opp.rating)}</span><b>${esc(opp.name)}</b></div></div>
+      <p class="center-note muted">${esc(game.name)} · seed #${seed} · ${opts.tournament?esc(opts.tournament.name):(stake?'Pot '+fmt(stake*2)+' gold':'Free duel')}</p>`;
+    T(()=>{
+      $('#meName').textContent='You'; $('#meSub').textContent=fmt(my);
+      $('#oppName').textContent=opp.name; $('#oppSub').textContent=fmt(opp.rating);
+      $('#seedNote').textContent=`${game.name} · seed #${seed} · identical for both players`;
+      $('#vsbar').hidden=false; $('#ovMeta').hidden=false;
+      RUN[gid](seed,opp,finish);
+    },1500);
+  },1300);
+}
+$('#forfeitBtn').onclick=()=>{ if(current&&!current.ended) finish(0,1,'<p class="center-note muted">You forfeited this duel.</p>',true); };
+
+function finish(my,op,detailHtml,forfeit){
+  if(!current||current.ended) return;
+  current.ended=true; clearAll();
+  const {game,stake,opp,opts}=current;
+  const res = my>op?'win':my<op?'loss':'draw';
+  const score = res==='win'?1:res==='draw'?.5:0;
+  const R=S.rating[game.id];
+  const exp=1/(1+Math.pow(10,(opp.rating-R)/400));
+  const dr=Math.round(24*(score-exp));
+  S.rating[game.id]=R+dr;
+  let payout=0;
+  if(res==='win') payout=Math.round(stake*2*(1-RAKE)); else if(res==='draw') payout=stake;
+  S.gold+=payout;
+  const net=payout-stake;
+  const dp = res==='win'?30:res==='draw'?10:5;
+  S.dp+=dp;
+  if(res==='win'){S.wins++;S.streak++;} else if(res==='loss'){S.losses++;S.streak=0;} else {S.draws++;}
+  if(!forfeit && (S.best[game.id]==null || my>S.best[game.id])) S.best[game.id]=my;
+  S.history.unshift({res,game:game.name,opp:opp.name,my:fmtScore(game.id,my),op:fmtScore(game.id,op),gold:net,dr});
+  S.history.length=Math.min(S.history.length,40);
+  save(); renderWallet();
+  setClock('END');
+  const label={win:'Victory',loss:'Defeat',draw:'Draw'}[res];
+  stage().innerHTML=`<div class="result">
+    <h2 class="${res}">${label}</h2>
+    <div class="scoreline"><span class="me">${fmtScore(game.id,my)}</span><span class="muted">–</span><span class="opp">${fmtScore(game.id,op)}</span></div>
+    <div class="payout">
+      <div class="stat"><span class="eyebrow">Stake</span><b>${stake?fmt(stake):'Free'}</b></div>
+      <div class="stat"><span class="eyebrow">Payout</span><b class="${payout>stake?'win':''}">${fmt(payout)}</b></div>
+      <div class="stat"><span class="eyebrow">Rating</span><b class="${dr>0?'win':dr<0?'loss':''}">${dr>0?'+':''}${dr} → ${fmt(S.rating[game.id])}</b></div>
+      <div class="stat"><span class="eyebrow">Duel points</span><b>+${dp}</b></div>
+    </div>
+    ${stake&&res==='win'?`<p class="fine">Pot ${fmt(stake*2)} − 10% fee ${fmt(stake*2*RAKE)} = ${fmt(payout)} gold.</p>`:''}
+    <div class="detail">${detailHtml||''}</div>
+    <div class="actions">
+      <button class="btn primary" id="rematchBtn" ${stake>S.gold?'disabled':''}>Rematch${stake?' · '+fmt(stake):''}</button>
+      <button class="btn" id="backBtn">Back to arena</button>
+    </div>
+  </div>`;
+  $('#rematchBtn').onclick=()=>startDuel(game.id,stake,opts);
+  $('#backBtn').onclick=closeOverlay;
+  $('#ovMeta').hidden=true;
+}
+function fmtScore(gid,v){return gid==='city'?v.toFixed(1):fmt(v);}
+function closeOverlay(){clearAll();$('#overlay').hidden=true;document.body.style.overflow='';current=null;renderArena();if(!$('#view-profile').hidden)renderProfile();if(!$('#view-tournaments').hidden)renderTournaments();}
+
+const RUN={};
+
+/* ---------- Reaction Duel ---------- */
+RUN.reaction=function(seed,opp,done){
+  const r=mulberry32(seed^0xA11CE);
+  const delays=Array.from({length:5},()=>1100+r()*2400);
+  const base=clamp(330-(opp.rating-1200)*0.12,190,380);
+  const oppT=Array.from({length:5},()=>Math.round(base+(r()-.5)*90));
+  let round=0, state='ready', t0=0, waitId=null, myW=0, opW=0; const rows=[];
+  stage().innerHTML=`<div style="display:grid;gap:14px">
+    <button class="pad ready" id="pad"></button>
+    <p class="center-note muted">Tap the pad or press Space. Tapping before gold is a foul (counts as 999 ms).</p>
+    <div class="box"><table id="rt"></table></div></div>`;
+  const pad=$('#pad');
+  function draw(){
+    const labels={ready:`Round ${round+1} of 5<small>Tap to start</small>`,wait:'Wait…',go:'Tap!',done:'…'};
+    pad.className='pad '+state; pad.innerHTML=labels[state];
+    setClock(`${myW} : ${opW}`);
+    $('#rt').innerHTML=`<tr><th>Round</th><th class="num">You</th><th class="num">${esc(opp.name)}</th><th>Winner</th></tr>`+
+      rows.map((x,i)=>`<tr><td>${i+1}</td><td class="num">${x.m===999?'Foul':x.m+' ms'}</td><td class="num">${x.o} ms</td><td class="${x.m<x.o?'win':'loss'}">${x.m<x.o?'You':esc(opp.name)}</td></tr>`).join('');
+  }
+  function record(ms){
+    const o=oppT[round]; rows.push({m:ms,o}); if(ms<o) myW++; else opW++;
+    round++; state='done'; draw();
+    if(round>=5 || myW>=3 || opW>=3){ T(()=>done(myW,opW,`<div class="box"><table>${$('#rt').innerHTML}</table></div>`),900); }
+    else T(()=>{state='ready';draw();},900);
+  }
+  function act(){
+    if(state==='ready'){ state='wait'; draw(); waitId=T(()=>{state='go';t0=performance.now();draw();},delays[round]); }
+    else if(state==='wait'){ clearTimeout(waitId); record(999); }
+    else if(state==='go'){ record(Math.round(performance.now()-t0)); }
+  }
+  pad.addEventListener('pointerdown',e=>{e.preventDefault();act();});
+  onKey(e=>{if(e.code==='Space'){e.preventDefault();act();}});
+  draw();
+};
+
+/* ---------- Number Rush ---------- */
+RUN.rush=function(seed,opp,done){
+  const r=mulberry32(seed^0xBEEF);
+  const probs=[];
+  for(let i=0;i<60;i++){
+    const lvl=Math.floor(i/5), type=Math.floor(r()*(lvl<1?2:lvl<3?3:4));
+    let a,b,ans,txt;
+    const hi=10+lvl*8;
+    if(type===0){a=2+Math.floor(r()*hi);b=2+Math.floor(r()*hi);ans=a+b;txt=`${a} + ${b}`;}
+    else if(type===1){a=10+Math.floor(r()*hi*1.5);b=2+Math.floor(r()*a*0.9);ans=a-b;txt=`${a} − ${b}`;}
+    else if(type===2){a=2+Math.floor(r()*(4+lvl*1.4));b=2+Math.floor(r()*(5+lvl));ans=a*b;txt=`${a} × ${b}`;}
+    else {b=2+Math.floor(r()*(4+lvl));ans=2+Math.floor(r()*(6+lvl*1.5));a=ans*b;txt=`${a} ÷ ${b}`;}
+    const opts=new Set([ans]); while(opts.size<4){const d=ans+Math.round((r()-.5)*Math.max(8,ans*0.3));if(d>=0&&d!==ans)opts.add(d);}
+    const arr=[...opts]; for(let k=arr.length-1;k>0;k--){const j=Math.floor(r()*(k+1));[arr[k],arr[j]]=[arr[j],arr[k]];}
+    probs.push({txt,ans,opts:arr});
+  }
+  const oppCorrect=Math.round(clamp(11+(opp.rating-1200)/28+(r()-.5)*4,6,26));
+  const oppWrong=Math.round(clamp(3-(opp.rating-1200)/150+r()*2,0,5));
+  const events=[]; for(let i=0;i<oppCorrect;i++)events.push({t:(i+1)*(39/(oppCorrect+1))+ (r()-.5),ok:true});
+  for(let i=0;i<oppWrong;i++)events.push({t:3+r()*34,ok:false}); events.sort((a,b)=>a.t-b.t);
+  const DUR=40; let i=0, my=0, streak=0, op=0, ostreak=0, ei=0, locked=false, correct=0; const start=performance.now();
+  stage().innerHTML=`<div style="display:grid;gap:14px">
+    <div class="race">
+      <div class="race-row"><span>You</span><div class="bar me"><i id="bm"></i></div><span class="mono" id="sm">0</span></div>
+      <div class="race-row"><span>${esc(opp.name)}</span><div class="bar opp"><i id="bo"></i></div><span class="mono" id="so">0</span></div>
+    </div>
+    <div class="problem" id="prob"></div>
+    <div class="answers" id="ans"></div>
+    <p class="center-note muted">Keys 1–4 also answer. Correct +100 plus streak bonus. Wrong −50.</p></div>`;
+  function show(){
+    const p=probs[i]; $('#prob').textContent=p.txt+' = ?';
+    $('#ans').innerHTML=p.opts.map((o,k)=>`<button data-v="${o}"><span>${o}</span><kbd>${k+1}</kbd></button>`).join('');
+    $('#ans').querySelectorAll('button').forEach(b=>b.onclick=()=>answer(+b.dataset.v,b));
+  }
+  function bars(){const top=Math.max(my,op,1500);$('#bm').style.width=(my/top*100)+'%';$('#bo').style.width=(op/top*100)+'%';$('#sm').textContent=fmt(my);$('#so').textContent=fmt(op);}
+  function answer(v,btn){
+    if(locked)return; locked=true;
+    const ok=v===probs[i].ans;
+    if(ok){streak++;correct++;my+=100+Math.min(streak-1,5)*10;btn.classList.add('right');}
+    else{streak=0;my=Math.max(0,my-50);btn.classList.add('wrong');}
+    bars();
+    T(()=>{i++;locked=false;if(i<probs.length)show();},ok?140:380);
+  }
+  onKey(e=>{const n=+e.key;if(n>=1&&n<=4){const b=$('#ans').querySelectorAll('button')[n-1];if(b)answer(+b.dataset.v,b);}});
+  I(()=>{
+    const el=(performance.now()-start)/1000;
+    while(ei<events.length&&events[ei].t<=el){const ev=events[ei++];if(ev.ok){ostreak++;op+=100+Math.min(ostreak-1,5)*10;}else{ostreak=0;op=Math.max(0,op-50);}}
+    bars();
+    const left=Math.max(0,DUR-el); setClock(left.toFixed(1)+'s');
+    if(left<=0){done(my,op,`<p class="center-note muted">You answered ${correct} correctly. ${esc(opp.name)} answered ${oppCorrect}.</p>`);}
+  },100);
+  show(); bars();
+};
+
+/* ---------- Memory Duel ---------- */
+RUN.memory=function(seed,opp,done){
+  const r=mulberry32(seed^0xC0FFEE);
+  const seq=Array.from({length:30},()=>Math.floor(r()*9));
+  const oppLevel=Math.round(clamp(7+(opp.rating-1200)/110+(r()-.5)*3,3,18));
+  let len=3, pos=0, best=0, accepting=false;
+  stage().innerHTML=`<div style="display:grid;gap:14px">
+    <p class="center-note" id="mnote"></p>
+    <div class="mem locked" id="mem">${Array.from({length:9},(_,k)=>`<button data-k="${k}" aria-label="Tile ${k+1}"></button>`).join('')}</div>
+    <p class="center-note muted">${esc(opp.name)} is playing the same sequence. Their result is revealed at the end.</p></div>`;
+  const tiles=[...$('#mem').querySelectorAll('button')];
+  function play(){
+    accepting=false; $('#mem').classList.add('locked'); pos=0;
+    setClock('Lv '+len); $('#mnote').textContent=`Watch: ${len} tiles`;
+    const on=Math.max(260,520-len*18), off=160;
+    for(let k=0;k<len;k++){
+      T(()=>tiles[seq[k]].classList.add('lit'), 500+k*(on+off));
+      T(()=>tiles[seq[k]].classList.remove('lit'), 500+k*(on+off)+on);
+    }
+    T(()=>{accepting=true;$('#mem').classList.remove('locked');$('#mnote').textContent='Your turn: repeat the sequence';},500+len*(on+off));
+  }
+  tiles.forEach(t=>t.addEventListener('pointerdown',e=>{
+    e.preventDefault(); if(!accepting)return;
+    const k=+t.dataset.k;
+    if(k===seq[pos]){
+      t.classList.add('lit'); T(()=>t.classList.remove('lit'),160); pos++;
+      if(pos===len){best=len;accepting=false;$('#mnote').textContent='Correct';len++;if(len>seq.length){end();return;}T(play,700);}
+    } else {
+      accepting=false; t.classList.add('bad'); tiles[seq[pos]].classList.add('lit');
+      $('#mnote').textContent='Wrong tile'; T(end,1100);
+    }
+  }));
+  function end(){done(best,oppLevel,`<p class="center-note muted">You completed a ${best}-tile sequence. ${esc(opp.name)} completed ${oppLevel}.</p>`);}
+  play();
+};
+
+/* ---------- City Duel ---------- */
+const B={
+  res:{name:'Houses',cost:800,tag:'RES',note:'Population'},
+  com:{name:'Shops',cost:1200,tag:'COM',note:'Revenue, jobs'},
+  ind:{name:'Factory',cost:1000,tag:'IND',note:'Jobs, pollutes'},
+  park:{name:'Park',cost:500,tag:'PRK',note:'+Happiness'},
+  pwr:{name:'Power',cost:1500,tag:'PWR',note:'Powers radius 2'},
+  sch:{name:'School',cost:1400,tag:'SCH',note:'+Happiness r2'}
+};
+const N=6, BUDGET=10000;
+function around(i,rad){const x=i%N,y=Math.floor(i/N),out=[];for(let dy=-rad;dy<=rad;dy++)for(let dx=-rad;dx<=rad;dx++){if(!dx&&!dy)continue;const nx=x+dx,ny=y+dy;if(nx>=0&&ny>=0&&nx<N&&ny<N)out.push(ny*N+nx);}return out;}
+function cityScore(g,money){
+  const powered=i=>g[i]==='pwr'||around(i,2).some(j=>g[j]==='pwr');
+  const count=(i,rad,t)=>around(i,rad).filter(j=>g[j]===t).length;
+  let pop=0,jobs=0,rev=0,happySum=0,resN=0,built=0,pw=0,ind=0,park=0,pwrN=0;
+  g.forEach((t,i)=>{
+    if(!t||t==='x')return; built++; const p=powered(i); if(p)pw++; const f=p?1:0.35;
+    if(t==='res'){const near1=count(i,1,'ind'),near2=count(i,2,'ind')-near1;
+      const h=clamp(55+12*count(i,1,'park')+10*count(i,2,'sch')-18*near1-6*near2,0,100);
+      happySum+=h;resN++;pop+=120*(0.4+h/100)*f;}
+    else if(t==='com'){jobs+=p?60:20;rev+=(40+25*count(i,1,'res'))*f;}
+    else if(t==='ind'){jobs+=p?110:35;rev+=150*f;ind++;}
+    else if(t==='sch'){jobs+=20;} else if(t==='pwr'){jobs+=15;pwrN++;} else if(t==='park'){park++;}
+  });
+  const workers=pop*0.45;
+  const staffed=jobs?Math.min(1,workers/jobs):0; rev*=staffed;
+  const employment=workers?Math.min(1,jobs/workers):0;
+  const pollution=Math.max(0,ind*10+pwrN*4-park*3);
+  const happy=resN?clamp(happySum/resN-pollution*0.5,0,100):0;
+  const score=pop/25+rev/12+happy*0.4+employment*15-pollution*0.6+money/400;
+  return {score:Math.max(0,Math.round(score*10)/10),pop:Math.round(pop),jobs,rev:Math.round(rev),happy:Math.round(happy),employment:Math.round(employment*100),pollution,powered:built?Math.round(pw/built*100):0,powMap:g.map((t,i)=>t&&t!=='x'?powered(i):true)};
+}
+function aiCity(blocked,seed,rating){
+  const r=mulberry32(seed^0x5EED);
+  const g=Array(N*N).fill(null); blocked.forEach(i=>g[i]='x'); let money=BUDGET;
+  const skill=clamp(0.55+(rating-1200)/800,0.35,0.92);
+  for(let step=0;step<20;step++){
+    const cur=cityScore(g,money).score, cands=[];
+    for(const t in B){if(B[t].cost>money)continue;for(let i=0;i<N*N;i++){if(g[i])continue;g[i]=t;const s=cityScore(g,money-B[t].cost).score;g[i]=null;cands.push({t,i,d:s-cur});}}
+    if(!cands.length)break;
+    cands.sort((a,b)=>b.d-a.d);
+    const pickC = r()<skill ? cands[0] : cands[Math.floor(r()*Math.min(cands.length,40))];
+    if(pickC.d<=0 && r()<skill) break;
+    g[pickC.i]=pickC.t; money-=B[pickC.t].cost;
+  }
+  return {g,money};
+}
+function boardHtml(g,pm,small,interactive){
+  return `<div class="board ${small?'small':''}" ${interactive?'id="board"':''}>${g.map((t,i)=>
+    `<${interactive?'button':'div'} class="cell ${t||''} ${t&&t!=='x'&&!pm[i]?'unpowered':''}" ${interactive?`data-i="${i}" aria-label="Plot ${i+1}${t&&t!=='x'?': '+B[t].name:''}"`:''}>${t&&t!=='x'?B[t].tag:''}</${interactive?'button':'div'}>`).join('')}</div>`;
+}
+RUN.city=function(seed,opp,done){
+  const r=mulberry32(seed^0xC17);
+  const blocked=new Set(); while(blocked.size<5)blocked.add(Math.floor(r()*N*N));
+  const g=Array(N*N).fill(null); blocked.forEach(i=>g[i]='x');
+  let money=BUDGET, tool='res'; const DUR=60; const start=performance.now();
+  stage().innerHTML=`<div style="display:grid;gap:14px">
+    <div class="legend">${Object.keys(B).map(k=>`<span><i class="cell ${k}" style="display:inline-block;width:10px;height:10px;border-radius:2px"></i>${B[k].name}</span>`).join('')}<span><i style="background:#244670"></i>Water</span></div>
+    <div class="city-wrap">
+      <div style="display:grid;gap:10px;min-width:0">
+        <div id="boardHost"></div>
+        <div class="tools" id="tools"></div>
+      </div>
+      <div class="box" style="display:grid;gap:10px;align-content:start">
+        <div><span class="eyebrow">Projected city score</span><div class="big-score" id="cScore">0</div></div>
+        <div class="cstats" id="cStats"></div>
+        <button class="btn primary" id="cDone">Finish build</button>
+        <p class="fine" style="margin:0">Same map and budget as ${esc(opp.name)}. Click a placed building to bulldoze it for a full refund. Unpowered buildings run at 35%.</p>
+      </div>
+    </div></div>`;
+  function draw(){
+    const s=cityScore(g,money);
+    $('#boardHost').innerHTML=boardHtml(g,s.powMap,false,true);
+    $('#board').querySelectorAll('button').forEach(b=>b.onclick=()=>place(+b.dataset.i));
+    $('#tools').innerHTML=Object.keys(B).map(k=>`<button class="tool" data-t="${k}" aria-pressed="${tool===k}" ${B[k].cost>money?'disabled':''}><b>${B[k].name}</b><span class="mono">$${fmt(B[k].cost)}</span><span class="muted">${B[k].note}</span></button>`).join('');
+    $('#tools').querySelectorAll('button').forEach(b=>b.onclick=()=>{tool=b.dataset.t;draw();});
+    $('#cScore').textContent=s.score.toFixed(1);
+    $('#cStats').innerHTML=[['Budget left','$'+fmt(money)],['Population',fmt(s.pop)],['Jobs',fmt(s.jobs)],['Revenue','$'+fmt(s.rev)],['Happiness',s.happy+'%'],['Employment',s.employment+'%'],['Pollution',s.pollution],['Powered',s.powered+'%']]
+      .map(x=>`<div><span class="muted">${x[0]}</span><b>${x[1]}</b></div>`).join('');
+  }
+  function place(i){
+    if(g[i]==='x')return;
+    if(g[i]){money+=B[g[i]].cost;g[i]=null;}
+    else if(B[tool].cost<=money){g[i]=tool;money-=B[tool].cost;}
+    draw();
+  }
+  function end(){
+    const mine=cityScore(g,money);
+    const ai=aiCity(blocked,seed,opp.rating); const theirs=cityScore(ai.g,ai.money);
+    const rowsOf=s=>[['Population',fmt(s.pop)],['Revenue','$'+fmt(s.rev)],['Happiness',s.happy+'%'],['Employment',s.employment+'%'],['Pollution',s.pollution]];
+    const col=(title,cls,gr,s,m)=>`<div class="box" style="display:grid;gap:10px"><div class="eyebrow">${title}</div>${boardHtml(gr,s.powMap,true,false)}
+      <div class="cstats">${rowsOf(s).map(x=>`<div><span class="muted">${x[0]}</span><b>${x[1]}</b></div>`).join('')}<div><span class="muted">Budget left</span><b>$${fmt(m)}</b></div></div>
+      <div><span class="eyebrow">City score</span><div class="big-score" style="color:var(${cls})">${s.score.toFixed(1)}</div></div></div>`;
+    done(mine.score,theirs.score,`<div class="cmp">${col('Your city','--gold',g,mine,money)}${col(esc(opp.name)+"'s city",'--rival',ai.g,theirs,ai.money)}</div>`);
+  }
+  $('#cDone').onclick=end;
+  I(()=>{const left=Math.max(0,DUR-(performance.now()-start)/1000);setClock(left.toFixed(0)+'s');if(left<=0)end();},250);
+  draw();
+};
+
+/* ---------- Boot ---------- */
+renderWallet(); renderArena(); renderGames();
+})();
+</script>

@@ -1,0 +1,55 @@
+from common import *
+with browser_page(1440,900,False) as page:
+    open_app(page, APP); page.wait_for_function("DG.__appReady"); page.wait_for_timeout(300)
+    out=[]
+    for i in range(12): page.keyboard.press('Tab'); out.append(page.evaluate("!!document.activeElement.closest('.modal')"))
+    print('age gate trap leaks', out.count(False), '/12')
+    page.keyboard.press('Escape'); print('age gate esc-proof', bool(page.query_selector('[data-test=age-gate]')))
+    page.click('#ageAdult')
+    page.evaluate("DGApp.go('games')"); page.wait_for_timeout(200)
+    page.focus('[data-duel="chess"]'); page.keyboard.press('Enter'); page.wait_for_timeout(300)
+    out=[]
+    for i in range(40): page.keyboard.press('Tab'); out.append(page.evaluate("!!document.activeElement.closest('.modal')"))
+    out2=[]
+    for i in range(10): page.keyboard.press('Shift+Tab'); out2.append(page.evaluate("!!document.activeElement.closest('.modal')"))
+    print('sheet trap leaks', out.count(False), '/40; shift-tab leaks', out2.count(False))
+    page.keyboard.press('Escape'); page.wait_for_timeout(100)
+    print('focus returned', page.evaluate("document.activeElement.getAttribute('data-duel')"))
+    page.evaluate("DGApp.startMatch({game:'sudoku',format:'1v1',stake:0})"); page.wait_for_selector('[data-test=start]:not([disabled])')
+    out=[]; seq=[]
+    for i in range(25): page.keyboard.press('Tab'); out.append(page.evaluate("!!document.activeElement.closest('#ov')")); seq.append(page.evaluate("document.activeElement.id||document.activeElement.className.toString().slice(0,20)"))
+    print('overlay trap leaks', out.count(False), '/25', seq[:6])
+    page.click('#ovForfeit'); page.wait_for_timeout(200)
+    out=[]
+    for i in range(10): page.keyboard.press('Tab'); out.append(page.evaluate("!!document.activeElement.closest('.modal')"))
+    print('forfeit confirm trap leaks', out.count(False))
+    page.keyboard.press('Escape'); page.wait_for_timeout(100); print('forfeit esc closes', not page.query_selector('[data-test=forfeit-confirm]'), page.evaluate("DGApp.current().phase"))
+    shot(page,'v2-a11y-overlay-1440')
+    page.evaluate("DGApp.close()")
+    print('lang', page.evaluate("document.documentElement.lang"))
+with browser_page(360,780,True) as page:
+    boot(page)
+    page.evaluate("DGApp.set({limits:{loss:500,remind:0,coolUntil:Date.now()+86400000,pending:null}})")
+    page.tap('#settingsBtn'); page.wait_for_timeout(200)
+    page.tap('#resetBtn'); page.wait_for_timeout(200); shot(page,'v2-reset-confirm-360')
+    page.tap('#confirmYes'); page.wait_for_timeout(400)
+    print('age gate shown after reset', bool(page.query_selector('[data-test=age-gate]')))
+    print('after reset', page.evaluate("DGApp.state().limits"), page.evaluate("DGApp.state().age"), 'gold', page.evaluate("DGApp.state().gold"))
+    print('staked start ->', page.evaluate("DGApp.startMatch({game:'sudoku',format:'1v1',stake:500})"))
+    # raising limit delayed
+    page.evaluate("DGApp.set({limits:{loss:500,remind:0,coolUntil:0,pending:null}})")
+    page.tap('#bn-home'); page.tap('#settingsBtn'); page.wait_for_timeout(200)
+    page.tap('#loss-0'); page.wait_for_timeout(200)
+    print('remove limit ->', page.evaluate("DGApp.state().limits"), page.inner_text('#lossBox')[-200:].replace('\n',' '))
+    shot(page,'v2-settings-limit-360')
+with browser_page(360,780,True) as page:
+    boot(page, age='minor'); page.wait_for_timeout(300)
+    shot(page,'v2-minor-home-360')
+    print('minor block', page.evaluate("document.querySelector('#dnBlock') && document.querySelector('#dnBlock').textContent"))
+    page.tap('#settingsBtn'); page.wait_for_timeout(200); shot(page,'v2-minor-settings-360')
+    print('ageAgain button', bool(page.query_selector('#ageAgain')), page.inner_text('#ageBox').replace('\n',' '))
+    print('ageGate(true) via hook-less check: staked ->', page.evaluate("DGApp.startMatch({game:'sudoku',format:'1v1',stake:100})"))
+    page.tap('#resetBtn'); page.tap('#confirmYes'); page.wait_for_timeout(300)
+    print('minor after reset age', page.evaluate("DGApp.state().age"), 'gate shown', bool(page.query_selector('[data-test=age-gate]')))
+    page.evaluate("DGApp.go('tournaments')"); page.wait_for_timeout(200)
+    print('minor tours joinable', page.evaluate("[...document.querySelectorAll('[data-join]')].map(b=>[b.id,b.disabled])"))

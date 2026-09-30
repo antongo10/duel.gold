@@ -1,0 +1,24 @@
+OK chess@360 win dr=12 how=clicked a2-a3 rf=('loss', 0) title=Victory
+OK four@360 win dr=13 how=tap [data-test=col-3] rf=('loss', 0) title=Victory
+OK reversi@360 win dr=13 how=tap [data-test=sq-21] rf=('loss', 0) title=Victory
+{"game": "gomoku", "w": 360, "escrow_ok": true, "input_ok": false, "how": "tap [data-test=pt-113]", "phase": "result", "outcome": "win", "payout": 180, "payout_ok": true, "dr": 10, "dr_ok": true, "hist_ok": true, "title": "Victory", "screen_outcome": "win", "tiles": "STAKE 100 PAYOUT 180 NET +80 RATING +10 DUEL POINTS +35", "rematch_ok": true, "rematch_forfeit": ["loss", 0], "errors": []}
+OK sudoku@360 win dr=13 how=tapped 2 cells+digits rf=('loss', 0) title=Victory
+OK mines@360 win dr=11 how=revealed cell 0 rf=('loss', 0) title=Victory
+OK queens@360 win dr=10 how=tapped cell marks rf=('loss', 0) title=Victory
+OK tiles2048@360 win dr=13 how=touch swipes rf=('loss', 0) title=Victory
+OK memory@360 loss dr=-13 how=tapped sequence of 3 rf=('loss', 0) title=Defeat
+OK reaction@360 loss dr=-13 how=tap reaction {'ms': 179, 'foul': False, 'slow': False, 'pts': 821} rf=('loss', 0) title=Defeat
+OK aim@360 win dr=12 how=canvas taps hit 2 rf=('loss', 0) title=Victory
+OK rush@360 win dr=13 how=tap option rf=('loss', 0) title=Victory
+OK darts@360 win dr=12 how=touch hold+release rf=('loss', 0) title=Victory
+OK hockey@360 win dr=13 how=touch drag paddle rf=('loss', 0) title=Victory
+OK base@360 win dr=12 how=tap tool + map tile rf=('loss', 0) title=Victory
+OK city@360 win dr=13 how=tool + tile tap, Finish button rf=('loss', 0) title=Victory
+OK restaurant@360 win dr=11 how=tables +, Open button rf=('loss', 0) title=Victory
+OK trivia@360 win dr=12 how=tap answer rf=('loss', 0) title=Victory
+OK groups@360 win dr=11 how=tapped 4 tiles + submit rf=('loss', 0) title=Victory
+OK durak@360 win dr=13 how=tapped card {'t': 'beat', 'c': 13, 'i': 0} rf=('loss', 0) title=Victory
+OK liars@360 win dr=12 how=face + bid rf=('loss', 0) title=Victory
+OK auction@360 loss dr=-14 how=typed bid + Seal rf=('loss', 0) title=Defeat
+scrollwidth [360, 360]
+all console errors: []

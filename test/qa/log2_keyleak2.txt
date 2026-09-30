@@ -1,0 +1,7 @@
+queens arrow-down scrollTop sequence [0, 0, 0, 0, 0, 0, 0] cursor 0
+tour focus after launch mmCancel [in ov] modals after Space/Enter [] cur None gold 9900 -> 9900
+watch focus after launch ovLeave [in ov] modals after Space/Enter [] cur None gold 9900 -> 9900
+Esc in chess -> phase play
+Esc closes forfeit dialog True phase play
+Tab reached behind overlay: [] 0
+[]

@@ -1,0 +1,42 @@
+import sys
+from common import *
+key=sys.argv[1] if len(sys.argv)>1 else '360'
+w,h,t=SIZES[key]
+with browser_page(w,h,t) as page:
+    boot(page)
+    page.evaluate("DGApp.startMatch({game:'rush',format:'2v2',stake:100})")
+    page.wait_for_selector('[data-test=start]'); shot(page,f'vs-2v2-{key}-full',True)
+    page.click('[data-test=start]'); page.wait_for_timeout(500)
+    page.evaluate("c=DGApp.ctx(); window.__iv=setInterval(()=>{try{c.test.answerCorrect()}catch(e){}},250)")
+    page.wait_for_function("DGApp.current().phase==='result'", timeout=90000); page.evaluate("clearInterval(window.__iv)")
+    page.wait_for_timeout(300); shot(page,f'res-2v2-{key}-full',True)
+    page.evaluate("DGApp.close()")
+    page.evaluate("DGApp.startMatch({game:'reaction',format:'ffa',stake:100})")
+    page.wait_for_selector('[data-test=start]'); shot(page,f'vs-ffa-{key}-full',True)
+    page.click('[data-test=start]'); page.wait_for_timeout(1000); shot(page,f'play-ffa-{key}')
+    page.evaluate("c=DGApp.ctx(); window.__iv=setInterval(()=>{try{c.test.fire(300)}catch(e){}},150)")
+    page.wait_for_function("DGApp.current().phase==='result'", timeout=90000); page.evaluate("clearInterval(window.__iv)")
+    page.wait_for_timeout(300); shot(page,f'res-ffa-{key}-full',True)
+    page.evaluate("DGApp.close()")
+    page.evaluate("DGApp.startMatch({game:'four',format:'tournament',stake:100})")
+    page.wait_for_selector('[data-test=start]'); shot(page,f'tour-qf-{key}-full',True)
+    for rnd in range(3):
+        if page.evaluate("DGApp.current().phase")=='result': break
+        page.wait_for_selector('[data-test=start]')
+        page.click('[data-test=start]'); page.wait_for_timeout(500)
+        page.evaluate("c=DGApp.ctx(); c.test.autoplay(0.95)")
+        page.wait_for_function("DGApp.current().phase!=='play'", timeout=120000)
+        page.wait_for_timeout(400)
+        shot(page,f'tour-after-r{rnd}-{key}-full',True)
+    print('tour', page.evaluate("DGApp.last()"))
+    page.evaluate("DGApp.close()")
+    page.evaluate("DGApp.startMatch({game:'any',format:'mix',stake:100})")
+    page.wait_for_selector('[data-test=start]'); shot(page,f'mix-r1-{key}-full',True)
+    page.evaluate("DGApp.forfeit()"); page.wait_for_timeout(300); shot(page,f'mix-forfeit-{key}-full',True)
+    print('mixff', page.evaluate("DGApp.last()"))
+    page.evaluate("DGApp.close()")
+    page.evaluate("DGApp.watchGame('chess')"); page.wait_for_timeout(4000); shot(page,f'watch-spect-chess-{key}')
+    page.evaluate("DGApp.close()")
+    page.evaluate("DGApp.setSpeed(4)"); page.evaluate("DGApp.watchGame('sudoku')"); page.wait_for_timeout(2500); shot(page,f'watch-race-{key}')
+    page.wait_for_selector('[data-test=watch-result]', timeout=120000); page.wait_for_timeout(300); shot(page,f'watch-race-end-{key}')
+    page.evaluate("DGApp.close()")

@@ -1,0 +1,24 @@
+OK chess@1280 win dr=13 how=clicked a7-a6 rf=('loss', 0) title=Victory
+OK four@1280 win dr=13 how=tap [data-test=col-3] rf=('loss', 0) title=Victory
+OK reversi@1280 win dr=13 how=tap [data-test=sq-21] rf=('loss', 0) title=Victory
+OK gomoku@1280 win dr=13 how=tap [data-test=pt-113] rf=('loss', 0) title=Victory
+OK sudoku@1280 win dr=13 how=tapped 2 cells+digits rf=('loss', 0) title=Victory
+OK mines@1280 win dr=13 how=revealed cell 4 rf=('loss', 0) title=Victory
+OK queens@1280 win dr=10 how=tapped cell marks rf=('loss', 0) title=Victory
+OK tiles2048@1280 win dr=12 how=arrow keys rf=('loss', 0) title=Victory
+OK memory@1280 loss dr=-12 how=tapped sequence of 3 rf=('loss', 0) title=Defeat
+OK reaction@1280 loss dr=-12 how=tap reaction {'ms': 90, 'foul': False, 'slow': False, 'pts': 910} rf=('loss', 0) title=Defeat
+OK aim@1280 win dr=14 how=canvas taps hit 2 rf=('loss', 0) title=Victory
+OK rush@1280 win dr=13 how=key 1 rf=('loss', 0) title=Victory
+OK darts@1280 win dr=13 how=mouse hold+release rf=('loss', 0) title=Victory
+OK hockey@1280 win dr=12 how=mouse move paddle rf=('loss', 0) title=Victory
+OK base@1280 loss dr=-14 how=tap tool + map tile rf=('loss', 0) title=Defeat
+OK city@1280 win dr=13 how=tool + tile tap, Finish button rf=('loss', 0) title=Victory
+OK restaurant@1280 win dr=12 how=tables +, Open button rf=('loss', 0) title=Victory
+OK trivia@1280 win dr=13 how=key 3 rf=('loss', 0) title=Victory
+OK groups@1280 win dr=14 how=tapped 4 tiles + submit rf=('loss', 0) title=Victory
+OK durak@1280 draw dr=2 how=tapped card {'t': 'attack', 'c': 23} rf=('loss', 0) title=Draw
+OK liars@1280 loss dr=-12 how=face + bid rf=('loss', 0) title=Defeat
+OK auction@1280 win dr=11 how=typed bid + Seal rf=('loss', 0) title=Victory
+scrollwidth [1280, 1280]
+all console errors: []

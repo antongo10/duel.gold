@@ -1,0 +1,23 @@
+chess {'rootW': 860, 'rootH': 718, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+four {'rootW': 860, 'rootH': 585, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+reversi {'rootW': 860, 'rootH': 675, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+gomoku {'rootW': 860, 'rootH': 715, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+sudoku {'rootW': 860, 'rootH': 516, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+mines {'rootW': 860, 'rootH': 638, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+queens {'rootW': 860, 'rootH': 623, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+tiles2048 {'rootW': 860, 'rootH': 504, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+memory {'rootW': 860, 'rootH': 541, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+reaction {'rootW': 860, 'rootH': 557, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+aim {'rootW': 860, 'rootH': 593, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+rush {'rootW': 860, 'rootH': 380, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+darts {'rootW': 860, 'rootH': 755, 'scrollH': 871, 'clientH': 797, 'docW': 1440}
+hockey {'rootW': 860, 'rootH': 619, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+base {'rootW': 860, 'rootH': 607, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+city {'rootW': 860, 'rootH': 1008, 'scrollH': 1124, 'clientH': 797, 'docW': 1440}
+restaurant {'rootW': 860, 'rootH': 972, 'scrollH': 1088, 'clientH': 797, 'docW': 1440}
+trivia {'rootW': 860, 'rootH': 351, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+groups {'rootW': 860, 'rootH': 418, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+durak {'rootW': 860, 'rootH': 516, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+liars {'rootW': 860, 'rootH': 584, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+auction {'rootW': 860, 'rootH': 504, 'scrollH': 797, 'clientH': 797, 'docW': 1440}
+['error: Failed to load resource: net::ERR_FAILED']

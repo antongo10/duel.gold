@@ -1,0 +1,10 @@
+toast-vs-rematch {'rect': [688, 728], 'toast': 112, 'hit': ['rematch', 'rematch', 'rematch'], 'scrollH': 798, 'clientH': 798}
+tournament four rounds played 3 stage 2 payout 180 expected 180 tp+ 50 OK hist {'g': 'four', 'gn': 'Four in a Row', 'f': 'tournament', 'stake': 100, 'o': 'loss', 's': 'Runner-up', 'net': 80, 'dr': 10, 'vs': 'Four in a Row Cup', 'seed': 434461, 'id': 2, 't': 1790749661111}
+   bracket text: QUARTER-FINAL |  | You | W | Yuki | Ines | W | Leila | Oskar | W | Jonah | Noor | W | Mateo |  | SEMI-FINAL |  | You | W | Ines | Oskar | Noor | W |  | FINAL |  | You | Noor | W
+tournament trivia rounds played 3 stage 3 payout 432 expected 432 tp+ 100 OK hist {'g': 'trivia', 'gn': 'Trivia Duel', 'f': 'tournament', 'stake': 100, 'o': 'win', 's': 'Champion', 'net': 332, 'dr': 34, 'vs': 'Trivia Duel Cup', 'seed': 932764, 'id': 3, 't': 1790749686419}
+   bracket text: QUARTER-FINAL |  | You | 1,466 | Hana | 613 | Chloe | 645 | Bruno | 965 | Marta | 859 | Mira | 357 | Kofi | 642 | Mei | 699 |  | SEMI-FINAL |  | You | 1,477 | Bruno | 737 | Marta | 767 | Mei | 596 |  | FINAL |  | You | 1,493 | Marta | 883
+mix ['darts', 'reaction', 'queens'] ['precision', 'reflex', 'puzzle'] played ['darts', 'reaction', 'queens'] win [9, 0] payout 180 OK 9–0 pts
+   table: ROUND	GAME	YOU	MEI	PTS | 1	Darts Nine	300	185	3–0 | 2	Reaction Duel	2,340	1,289	3–0 | 3	Royal Grid	1,440	300	3–0 | 	Total			9–0
+mix ['sudoku', 'restaurant', 'tiles2048'] ['puzzle', 'builder', 'numbers'] played ['sudoku', 'restaurant', 'tiles2048'] win [9, 0] payout 180 OK 9–0 pts
+   table: ROUND	GAME	YOU	SIGNE	PTS | 1	Sudoku Sprint	3,220	175	3–0 | 2	Restaurant Duel	9,233	7,146	3–0 | 3	Merge 2048	32,500	588	3–0 | 	Total			9–0
+errors []

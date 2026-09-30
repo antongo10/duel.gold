@@ -1,0 +1,10 @@
+2v2 sudoku win place None payout 180 dr 12 OK gold 10000 -> 10080
+2v2 trivia win place None payout 180 dr 12 OK gold 10080 -> 10160
+2v2 darts win place None payout 180 dr 12 OK gold 10160 -> 10240
+ffa sudoku win place 1 payout 252 dr 12 OK gold 10240 -> 10392
+   table: #	PLAYER	POINTS	PRIZE | 1	You	4,795	252 | 2	Dev	1,050	108 | 3	Nadia	825	0 | 4	Rafa	500	0
+ffa trivia win place 1 payout 252 dr 13 OK gold 10392 -> 10544
+   table: #	PLAYER	PTS	PRIZE | 1	You	1,471	252 | 2	Leila	1,113	108 | 3	Kofi	975	0 | 4	Obi	725	0
+ffa darts win place 1 payout 252 dr 12 OK gold 10544 -> 10696
+   table: #	PLAYER	PTS	PRIZE | 1	You	450	252 | 2	Elio	131	108 | 3	Ayla	112	0 | 4	Yuki	106	0
+errors []

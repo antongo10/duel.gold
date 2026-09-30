@@ -1,0 +1,51 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>DG harness</title>
+<link rel="stylesheet" href="../src/core/base.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="../src/core/sdk.js"></script>
+<style>body{margin:0;padding:16px}#bar{display:flex;gap:12px;align-items:center;margin-bottom:12px;overflow:hidden;white-space:nowrap}#root{max-width:860px}</style>
+</head><body>
+<div id="bar"><b id="status" class="dg-mono">--</b><span id="prog" class="dg-mono dg-muted"></span></div>
+<div id="root"></div>
+<script>
+/* Test harness: harness.html?files=strategy.js,brain.js&game=chess&mode=full&seed=42&skill=0.5&speed=1&auto=1&w=400
+   Exposes window.__errors, __result, __status, __progress, __run(opts), __games() */
+window.__errors = []; window.__result = null; window.__status = ''; window.__progress = [];
+window.addEventListener('error', e => window.__errors.push(String(e.message || e)));
+window.addEventListener('unhandledrejection', e => window.__errors.push('unhandled: ' + String(e.reason)));
+const P = new URLSearchParams(location.search);
+const files = (P.get('files') || '').split(',').filter(Boolean);
+function loadAll(list, cb){ if(!list.length) return cb(); const s=document.createElement('script'); s.src='../src/games/'+list[0];
+  s.onload=()=>loadAll(list.slice(1),cb); s.onerror=()=>{window.__errors.push('failed to load '+list[0]); loadAll(list.slice(1),cb);}; document.head.appendChild(s); }
+window.__games = () => DG.games.map(g => ({id:g.id, name:g.name, kind:g.kind, category:g.category, formats:g.formats, skill:g.skill, luck:g.luck, cashEligible:g.cashEligible, pack:g.pack, hasBot: typeof g.bot==='function', hasSpectate: typeof g.spectate==='function'}));
+window.__run = function(opts){
+  opts = Object.assign({game:P.get('game'), mode:P.get('mode')||'full', format:P.get('format')||'1v1', seed:+(P.get('seed')||12345), skill:+(P.get('skill')||0.5), speed:+(P.get('speed')||1)}, opts||{});
+  const g = DG.getGame(opts.game); if(!g){ window.__errors.push('no game '+opts.game); return; }
+  if (window.__handle) { try { window.__handle.abort(); } catch(e){} }
+  window.__result = null; window.__progress = [];
+  const opp = {name:'Rival', rating: 800 + opts.skill*1400, skill: opts.skill};
+  const root = document.getElementById('root');
+  window.__handle = DG.start(g, { root, seed: opts.seed, mode: opts.mode, format: opts.format, speed: opts.speed,
+    me:{name:'You', rating:1300}, opponents:[opp],
+    onStatus: t => { window.__status = t; document.getElementById('status').textContent = t; },
+    onProgress: s => { window.__progress.push(s); document.getElementById('prog').textContent = 'progress ' + s; },
+    onEnd: r => { window.__result = r; document.getElementById('status').textContent = 'ENDED ' + JSON.stringify({score:r.score,outcome:r.outcome,myScore:r.myScore,oppScore:r.oppScore}); },
+    onError: e => window.__errors.push('game error: ' + (e && e.stack || e)) });
+  return true;
+};
+window.__spectate = function(opts){
+  opts = Object.assign({game:P.get('game'), seed:+(P.get('seed')||12345), speed:+(P.get('speed')||1)}, opts||{});
+  const g = DG.getGame(opts.game); if(!g || !g.spectate){ window.__errors.push('no spectate for '+opts.game); return; }
+  window.__result = null;
+  const root = document.getElementById('root'); root.innerHTML='';
+  const h = DG.createContext({ root, seed: opts.seed, mode:'full', format:'1v1', speed: opts.speed,
+    me:{name:'Mira',rating:1500}, opponents:[{name:'Kofi',rating:1450,skill:0.46}],
+    onStatus: t => { window.__status = t; }, onEnd: r => { window.__result = r; }, onError: e => window.__errors.push('spectate error: ' + (e && e.stack || e)) });
+  h.ctx.players = [{name:'Mira',rating:1500,skill:0.5},{name:'Kofi',rating:1450,skill:0.46}];
+  window.__handle = h;
+  try { g.spectate(h.ctx); } catch(e){ window.__errors.push('spectate throw: '+e.stack); }
+};
+loadAll(files, () => { window.__ready = true; if (P.get('auto')==='1') window.__run(); });
+</script>
+</body></html>

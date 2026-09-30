@@ -1,0 +1,5 @@
+trivia key 2 pressed while Forfeit dialog open -> game reacted: False 0 0 dialog still open 1
+tiles2048 key ArrowLeft pressed while Forfeit dialog open -> game reacted: False 0 0 dialog still open 1
+rush key 4 pressed while Forfeit dialog open -> game reacted: False 0 0 dialog still open 1
+after friend challenge launch, focus: ['BUTTON', 'mmCancel', True]
+[]

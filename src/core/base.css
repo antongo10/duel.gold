@@ -1,0 +1,57 @@
+/* Duel.gold base tokens + shared components. Single deliberate dark "arena" look.
+   Games: use these tokens and dg-* classes; namespace your own classes as .g-<gameid>-* */
+:root{
+  --ink:#10111F;        /* page ground */
+  --panel:#181A2E;      /* raised surface */
+  --panel-2:#212440;    /* inputs, chips, tiles */
+  --panel-3:#2A2E52;    /* hover / pressed */
+  --line:#30345A;       /* hairlines */
+  --fg:#EEEAF7;         /* primary text */
+  --muted:#9D9BC0;      /* secondary text */
+  --gold:#F2C14E;       /* you / money / primary action */
+  --gold-deep:#B9892B;
+  --on-gold:#1A1406;    /* text on gold */
+  --rival:#FF6275;      /* opponent */
+  --ally:#6FC3FF;       /* teammate */
+  --good:#5AD690;
+  --warn:#FFB35C;
+  --bad:#FF6275;
+  --f-display:"Big Shoulders Display","Roboto Condensed","Arial Narrow","Liberation Sans Narrow",sans-serif-condensed,Impact,sans-serif;
+  --f-body:"Barlow","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,"SFMono-Regular",Menlo,monospace;
+  --r-sm:6px; --r-md:10px; --r-lg:14px;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{background:var(--ink);color:var(--fg)}
+body{font-family:var(--f-body);font-size:15px;line-height:1.5}
+button{font:inherit;color:inherit;cursor:pointer}
+:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.001ms!important;transition-duration:.001ms!important}}
+
+.dg-mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.dg-muted{color:var(--muted)}
+.dg-center{text-align:center}
+.dg-eyebrow{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--muted);font-weight:600}
+.dg-h{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.02em;line-height:1;margin:0;text-wrap:balance}
+.dg-stack{display:grid;gap:12px}
+.dg-row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.dg-box{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:14px 16px}
+.dg-btn{background:var(--panel-2);border:1px solid var(--line);border-radius:8px;padding:9px 16px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;font-size:13px;min-height:40px}
+.dg-btn:hover:not(:disabled){background:var(--panel-3)}
+.dg-btn.primary{background:var(--gold);border-color:var(--gold);color:var(--on-gold)}
+.dg-btn.primary:hover:not(:disabled){filter:brightness(1.06);background:var(--gold)}
+.dg-btn.danger{border-color:var(--bad);color:var(--bad)}
+.dg-btn:disabled{opacity:.4;cursor:not-allowed}
+.dg-chip{background:var(--panel-2);border:1px solid var(--line);border-radius:var(--r-sm);padding:6px 12px;font-weight:600;font-size:14px}
+.dg-chip[aria-pressed="true"]{border-color:var(--gold);color:var(--gold);background:color-mix(in srgb,var(--gold) 12%,var(--panel-2))}
+.dg-chip:disabled{opacity:.35;cursor:not-allowed}
+.dg-stat{background:var(--panel);border:1px solid var(--line);border-radius:var(--r-md);padding:10px 14px}
+.dg-stat b{display:block;font-family:var(--f-mono);font-size:22px;font-variant-numeric:tabular-nums}
+.dg-good{color:var(--good)} .dg-bad{color:var(--bad)} .dg-gold{color:var(--gold)} .dg-rival{color:var(--rival)} .dg-ally{color:var(--ally)}
+.dg-table{width:100%;border-collapse:collapse;font-size:14px}
+.dg-table th,.dg-table td{text-align:left;padding:7px 8px;border-top:1px solid var(--line)}
+.dg-table th{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:600;border-top:0}
+.dg-table .num{text-align:right;font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.dg-scroll-x{overflow-x:auto}
+.dg-note{font-size:13px;color:var(--muted)}

@@ -1,0 +1,11 @@
+sudoku {"digit": true, "arrows": true, "scroll": [[0, 876, 35], [0, 876, 35]], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+tiles2048 {"moves": 8, "scroll": [[0, 1866, 23], [0, 1866, 23]], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+reaction {"armed": "wait", "result": {"ms": 23, "foul": false, "slow": false, "pts": 977}, "scroll": [[0, 1199, 70], [0, 1199, 70]], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+rush {"right": 1, "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+trivia {"correct": 1, "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+four {"moved": true, "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+mines {"cursor": [92, 105], "flag": 0, "scroll": [[0, 223, 157], [0, 223, 157]], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+queens {"mark": 1, "ae": "cell-1 [in ov]", "scroll": [[0, 2189, 142], [0, 2189, 142]], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+memory {"longest": 3, "n": 3, "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+base {"tool3": "cannon", "phase": "wave", "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}
+groups {"found": [0], "focus_mm/ready/play": ["mmCancel [in ov]", "mStart [in ov]", "gameRoot [in ov]"], "modals": 0, "sheet_open": 0, "err": []}

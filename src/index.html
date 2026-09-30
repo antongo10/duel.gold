@@ -1,0 +1,79 @@
+<title>Duel.gold</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@600;800;900&family=Barlow:wght@400;500;600;700&family=JetBrains+Mono:wght@500;700&display=swap">
+<link rel="stylesheet" href="core/base.css">
+<link rel="stylesheet" href="core/app.css">
+
+<div class="app" id="app">
+  <div class="top" id="top" role="banner">
+    <div class="top-in">
+      <div class="top-row">
+        <a class="logo" href="#home" id="logo" aria-label="Duel.gold home">Duel<b>.gold</b></a>
+        <span class="demo-tag" id="demoTag" title="Demo gold has no cash value">Demo · no real money</span>
+        <div class="wallet" id="wallet" aria-label="Wallet">
+          <button class="pill gold" id="wGoldPill" data-go="home" aria-label="Gold balance"><span>Gold</span><b id="wGold" class="dg-mono">0</b></button>
+          <button class="pill dp" id="wDpPill" data-go="profile" aria-label="Duel points"><span>Duel points</span><b id="wDp" class="dg-mono">0</b></button>
+          <button class="pill cash" id="wCashPill" data-go="settings" data-anchor="cash" aria-label="Cash wallet, locked"><span>Cash <i class="ico-lock" aria-hidden="true"></i></span><b id="wCash" class="dg-mono">€0.00</b></button>
+          <button class="pill rate" id="wRatePill" data-go="profile" aria-label="Overall rating"><span>Rating</span><b id="wRating" class="dg-mono">1200</b></button>
+        </div>
+        <button class="icon-btn" id="settingsBtn" data-go="settings" aria-label="Settings and responsible play"></button>
+      </div>
+      <nav class="tabs" id="tabs" aria-label="Main"></nav>
+    </div>
+  </div>
+
+  <main class="main" id="main">
+    <div class="load-errors" id="loadErrors" role="status" hidden></div>
+    <p class="recover-note" id="recoverNote" role="status" hidden></p>
+    <section class="view" id="view-home" data-view="home" aria-label="Home"></section>
+    <section class="view" id="view-games" data-view="games" aria-label="Games" hidden></section>
+    <section class="view" id="view-watch" data-view="watch" aria-label="Watch" hidden></section>
+    <section class="view" id="view-tournaments" data-view="tournaments" aria-label="Tournaments" hidden></section>
+    <section class="view" id="view-social" data-view="social" aria-label="Social" hidden></section>
+    <section class="view" id="view-profile" data-view="profile" aria-label="Profile" hidden></section>
+    <section class="view" id="view-settings" data-view="settings" aria-label="Settings" hidden></section>
+    <section class="view" id="view-fair" data-view="fair" aria-label="How Duel.gold works" hidden></section>
+    <footer class="foot">
+      <p>Duel.gold prototype. Gold is demo currency with no cash value. Opponents are simulated and every score is calculated in your browser.</p>
+      <p><a href="#fair" id="footFair">How Duel.gold works</a> · <a href="#settings" id="footSettings">Responsible play</a></p>
+    </footer>
+  </main>
+
+  <nav class="bottom-nav" id="bottomNav" aria-label="Main"></nav>
+</div>
+
+<div class="ov" id="ov" hidden role="dialog" aria-modal="true" aria-label="Duel">
+  <div class="ov-bar" id="ovBar">
+    <div class="ov-side ov-left" id="ovLeft"></div>
+    <div class="ov-status dg-mono" id="ovStatus" aria-live="polite"></div>
+    <div class="ov-side ov-right" id="ovRight"></div>
+  </div>
+  <div class="ov-sub" id="ovSub">
+    <span id="ovInfo" class="ov-info"></span>
+    <span class="ov-demo" aria-label="Demo gold, no real money">Demo gold</span>
+    <button class="dg-btn ov-forfeit" id="ovForfeit" hidden>Forfeit</button>
+    <button class="dg-btn" id="ovLeave" hidden>Leave</button>
+  </div>
+  <div class="ov-scroll" id="ovScroll">
+    <div class="ov-race" id="ovRace" hidden></div>
+    <div class="ov-warn" id="ovWarn" hidden></div>
+    <div class="ov-stage" id="ovStage"></div>
+  </div>
+</div>
+
+<div class="modal-root" id="modalRoot"></div>
+<div class="toasts" id="toasts" aria-live="polite"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+<script src="core/sdk.js"></script>
+<script src="games/strategy.js"></script>
+<script src="games/brain.js"></script>
+<script src="games/reflex.js"></script>
+<script src="games/builder.js"></script>
+<script src="games/social.js"></script>
+<script src="core/state.js"></script>
+<script src="core/ui.js"></script>
+<script src="core/match.js"></script>
+<script src="core/views.js"></script>
+<script src="core/app.js"></script>

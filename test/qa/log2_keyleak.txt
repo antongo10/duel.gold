@@ -1,0 +1,23 @@
+chess {"overlay_scrollable": 263, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+four {"overlay_scrollable": 130, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+reversi {"overlay_scrollable": 220, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+gomoku {"overlay_scrollable": 260, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+sudoku {"overlay_scrollable": 135, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+mines {"overlay_scrollable": 257, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+queens {"overlay_scrollable": 242, "scrolled_by_keys": 242, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+tiles2048 {"overlay_scrollable": 123, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+memory {"overlay_scrollable": 160, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+reaction {"overlay_scrollable": 128, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+aim {"overlay_scrollable": 114, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+rush {"overlay_scrollable": 0, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+darts {"overlay_scrollable": 224, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+hockey {"overlay_scrollable": 78, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+base {"overlay_scrollable": 89, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+city {"overlay_scrollable": 627, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+restaurant {"overlay_scrollable": 324, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+trivia {"overlay_scrollable": 0, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+groups {"overlay_scrollable": 37, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+durak {"overlay_scrollable": 61, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+liars {"overlay_scrollable": 128, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+auction {"overlay_scrollable": 65, "scrolled_by_keys": 0, "focus_after_keep_playing": "gameRoot", "forfeit_dialog_reopened": {"Space": 0, "Enter": 0}, "phase": "play"}
+[]

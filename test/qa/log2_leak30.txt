@@ -1,0 +1,5 @@
+before {'rafCalls': 0, 'pend': 0, 'iv': 1, 'kd': 1} ro 0
+after 30 {'rafCalls': 1953, 'pend': 0, 'iv': 1, 'kd': 1} ro 0 peak keydown during a match 3
+idle rAF callbacks in 2 s after all matches: 0
+toasts in DOM 0 style tags 25 nodes 315
+errors []

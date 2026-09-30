@@ -1,0 +1,89 @@
+chess layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 621, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 10, 'dp': 35, 'place': None, 'stake': 100} gold 10080
+  errors []
+four layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 485, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 10, 'dp': 35, 'place': None, 'stake': 100} gold 10160
+  errors []
+reversi layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 503, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10240
+  errors []
+gomoku layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 515, 'docW': 360, 'ovW': 360, 'ovStageW': 334}
+  small targets [['g-gomoku-pt x0 y0 can', 'Point 1,1', 21, 16], ['g-gomoku-pt x1 y0 can', 'Point 2,1', 21, 16], ['g-gomoku-pt x2 y0 can', 'Point 3,1', 21, 16], ['g-gomoku-pt x3 y0 can', 'Point 4,1', 28, 16], ['g-gomoku-pt x4 y0 can', 'Point 5,1', 21, 16], ['g-gomoku-pt x5 y0 can', 'Point 6,1', 21, 16], ['g-gomoku-pt x6 y0 can', 'Point 7,1', 21, 16], ['g-gomoku-pt x7 y0 can', 'Point 8,1', 28, 16], ['g-gomoku-pt x8 y0 can', 'Point 9,1', 21, 16], ['g-gomoku-pt x9 y0 can', 'Point 10,1', 21, 16], ['g-gomoku-pt x10 y0 can', 'Point 11,1', 21, 16], ['g-gomoku-pt x11 y0 can', 'Point 12,1', 28, 16]]
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10320
+  errors []
+sudoku layout {'scrollH': 725, 'clientH': 680, 'rootW': 328, 'rootH': 609, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 11, 'dp': 35, 'place': None, 'stake': 100} gold 10400
+  errors []
+mines layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 529, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets [['g-mines-cell', 'Row 1 column 1', 25, 25], ['g-mines-cell', 'Row 1 column 2', 25, 25], ['g-mines-cell', 'Row 1 column 3', 25, 25], ['g-mines-cell', 'Row 1 column 4', 25, 25], ['g-mines-cell', 'Row 1 column 5', 25, 25], ['g-mines-cell', 'Row 1 column 6', 25, 25], ['g-mines-cell', 'Row 1 column 7', 25, 25], ['g-mines-cell', 'Row 1 column 8', 25, 25], ['g-mines-cell', 'Row 1 column 9', 25, 25], ['g-mines-cell', 'Row 1 column 10', 25, 25], ['g-mines-cell', 'Row 1 column 11', 25, 25], ['g-mines-cell', 'Row 1 column 12', 25, 25]]
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 14, 'dp': 35, 'place': None, 'stake': 100} gold 10480
+  errors []
+queens layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 548, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -13, 'dp': 10, 'place': None, 'stake': 100} gold 10380
+  errors []
+tiles2048 layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 431, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10460
+  errors []
+memory layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 528, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  TIMEOUT waiting result; status= Level 22 · 0:38 · watch
+  last {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -11, 'dp': 10, 'place': None, 'stake': 100} gold 10360
+  errors []
+reaction layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 547, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 13, 'dp': 35, 'place': None, 'stake': 100} gold 10440
+  errors []
+aim layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 424, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -14, 'dp': 10, 'place': None, 'stake': 100} gold 10340
+  errors []
+rush layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 373, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 13, 'dp': 35, 'place': None, 'stake': 100} gold 10420
+  errors []
+darts layout {'scrollH': 716, 'clientH': 680, 'rootW': 328, 'rootH': 600, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10500
+  errors []
+hockey layout {'scrollH': 711, 'clientH': 680, 'rootW': 328, 'rootH': 669, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 11, 'dp': 35, 'place': None, 'stake': 100} gold 10580
+  errors []
+base layout {'scrollH': 1119, 'clientH': 680, 'rootW': 328, 'rootH': 1003, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 11, 'dp': 35, 'place': None, 'stake': 100} gold 10480
+  errors []
+city layout {'scrollH': 1523, 'clientH': 680, 'rootW': 328, 'rootH': 1407, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 11, 'dp': 35, 'place': None, 'stake': 100} gold 10560
+  errors []
+restaurant layout {'scrollH': 2242, 'clientH': 680, 'rootW': 328, 'rootH': 2126, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 10, 'dp': 35, 'place': None, 'stake': 100} gold 10640
+  errors []
+trivia layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 475, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10720
+  errors []
+groups layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 402, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10800
+  errors []
+durak layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 497, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 14, 'dp': 35, 'place': None, 'stake': 100} gold 10880
+  errors []
+liars layout {'scrollH': 682, 'clientH': 680, 'rootW': 328, 'rootH': 640, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets []
+  last {'phase': 'result', 'outcome': 'win', 'payout': 180, 'net': 80, 'dr': 12, 'dp': 35, 'place': None, 'stake': 100} gold 10960
+  errors []
+auction layout {'scrollH': 680, 'clientH': 680, 'rootW': 328, 'rootH': 633, 'docW': 360, 'ovW': 360, 'ovStageW': 328}
+  small targets [['g-auction-range', 'bid slider', 298, 16]]
+  last {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -11, 'dp': 10, 'place': None, 'stake': 100} gold 10860
+  errors []

@@ -1,0 +1,39 @@
+after QF {'round': 1, 'alive': True} ready
+tour forfeit in SF: {'phase': 'result', 'outcome': 'loss', 'payout': 54, 'net': -46, 'dr': 0, 'dp': 40, 'stage': 1, 'tp': 25, 'stake': 100} gold delta -46 expected -46 hist Semi-finalist
+bracket QUARTER-FINAL |  | You | 1,432 | Chloe | 479 | Sven | 1,125 | Lucia | 506 | Leila | 857 | Diego | 476 | Viktor | 503 | Kofi | 1,007 |  | SEMI-FINAL |  | You | Sven | W | Leila | 897 | Kofi | 697 |  | FINAL |  | Sven | 713 | Leila | 1,065
+tour QF forfeit {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -11, 'dp': 10, 'stage': 0, 'tp': 10, 'stake': 100} gold delta -100
+Enter again -> tournament ['four'] gold -200
+mix forfeit r2 {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': 0, 'dp': 10, 'stake': 100, 'pts': [3, 3]} gold delta -100 hist {'g': 'mix', 'gn': 'Duel Mix', 'games': ['groups', 'base'], 'seeds': [104314, 255119], 'f': 'mix', 'stake': 100, 'o': 'loss', 's': '3–3 pts', 'net': -100, 'dr': 0, 'vs': 'Luca', 'seed': 104314, 'id': 4, 't': 1790749652962}
+mix rematch games ['reaction', 'mines', 'rush'] prev ['groups', 'base', 'mines'] same opp [{'name': 'Luca', 'rating': 1191, 'skill': 0.2792857142857143}]
+2v2 forfeit {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -11, 'dp': 10, 'place': None, 'stake': 100} gold delta -100
+ffa forfeit {'phase': 'result', 'outcome': 'loss', 'payout': 0, 'net': -100, 'dr': -13, 'dp': 10, 'place': 4, 'stake': 100} gold delta -100
+Traceback (most recent call last):
+  File "/home/claude/duel-gold/test/qa/fmtforfeit.py", line 51, in <module>
+    page.evaluate("DGApp.startMatch({game:'sudoku', format:'1v1', stake:250})"); page.click('#mmCancel')
+                                                                                 ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/playwright/sync_api/_generated.py", line 9927, in click
+    self._sync(
+  File "/usr/local/lib/python3.11/dist-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/playwright/_impl/_page.py", line 857, in click
+    return await self._main_frame.click(**locals_to_params(locals()))
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/playwright/_impl/_frame.py", line 549, in click
+    await self._channel.send("click", self._timeout, locals_to_params(locals()))
+  File "/usr/local/lib/python3.11/dist-packages/playwright/_impl/_connection.py", line 69, in send
+    return await self._connection.wrap_api_call(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/usr/local/lib/python3.11/dist-packages/playwright/_impl/_connection.py", line 559, in wrap_api_call
+    raise rewrite_error(error, f"{parsed_st['apiName']}: {error}") from None
+playwright._impl._errors.TimeoutError: Page.click: Timeout 30000ms exceeded.
+Call log:
+  - waiting for locator("#mmCancel")
+    - locator resolved to <button id="mmCancel" class="dg-btn">Cancel</button>
+  - attempting click action
+    - waiting for element to be visible, enabled and stable
+    - element is visible, enabled and stable
+    - scrolling into view if needed
+    - done scrolling
+  - element was detached from the DOM, retrying
+

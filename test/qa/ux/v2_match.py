@@ -1,0 +1,41 @@
+import sys, time
+from common import *
+key=sys.argv[1]; w,h,t=SIZES[key]
+with browser_page(w,h,t) as page:
+    boot(page)
+    page.evaluate("DGApp.startMatch({game:'chess',format:'1v1',stake:100})"); page.wait_for_timeout(400)
+    shot(page,f'v2-mm-{key}')
+    page.wait_for_selector('[data-test=start]:not([disabled])', timeout=10000); page.wait_for_timeout(200)
+    shot(page,f'v2-rules-chess-{key}')
+    print('overlay info', page.inner_text('#ovSub'))
+    page.wait_for_timeout(12000)
+    print('after 12s idle phase:', page.evaluate("DGApp.current().phase"))
+    page.click('[data-test=start]'); page.wait_for_timeout(1500)
+    shot(page,f'v2-chess-play-{key}')
+    print('status', page.inner_text('#ovStatus'))
+    page.evaluate("DGApp.ctx().test.autoplay(0.95)")
+    page.wait_for_function("DGApp.current().phase==='result'", timeout=180000); page.wait_for_timeout(400)
+    shot(page,f'v2-chess-result-{key}')
+    print('chess', page.evaluate("DGApp.last()"))
+    # toasts vs actions
+    ov = page.evaluate("""(()=>{const t=[...document.querySelectorAll('.toast')].map(x=>x.getBoundingClientRect());const b=document.querySelector('#resRematch')||document.querySelector('#resBack');const r=b?b.getBoundingClientRect():null;return {toasts:t.map(x=>[Math.round(x.top),Math.round(x.bottom)]),btn:r&&[Math.round(r.top),Math.round(r.bottom)],overlap:r?t.some(x=>x.top<r.bottom&&x.bottom>r.top):null}})()""")
+    print('toast overlap', ov)
+    page.evaluate("DGApp.close()")
+    # 2v2 bar
+    page.evaluate("DGApp.startMatch({game:'rush',format:'2v2',stake:100})")
+    page.wait_for_selector('[data-test=start]:not([disabled])', timeout=10000); page.click('[data-test=start]'); page.wait_for_timeout(2000)
+    shot(page,f'v2-2v2-play-{key}')
+    print('2v2 bar', page.inner_text('#ovBar').replace('\n',' | '))
+    page.evaluate("c=DGApp.ctx(); window.__iv=setInterval(()=>{try{c.test.answerCorrect()}catch(e){}},250)")
+    page.wait_for_function("DGApp.current().phase==='result'", timeout=90000); page.evaluate("clearInterval(window.__iv)"); page.wait_for_timeout(300)
+    shot(page,f'v2-2v2-result-{key}')
+    page.evaluate("DGApp.close()")
+    # tournament bracket
+    page.evaluate("DGApp.startMatch({game:'four',format:'tournament',stake:100})")
+    page.wait_for_selector('[data-test=start]:not([disabled])'); shot(page,f'v2-tour-qf-{key}'); shot(page,f'v2-tour-qf-{key}-full',True)
+    page.click('[data-test=start]'); page.wait_for_timeout(500); page.evaluate("DGApp.ctx().test.autoplay(0.95)")
+    page.wait_for_function("DGApp.current().phase!=='play'", timeout=120000); page.wait_for_timeout(500)
+    shot(page,f'v2-tour-between-{key}'); shot(page,f'v2-tour-between-{key}-full',True)
+    print('bracket status', page.inner_text('#ovStatus'))
+    page.evaluate("DGApp.close()")
+    print(errs(page))
