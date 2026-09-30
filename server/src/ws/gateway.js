@@ -52,7 +52,7 @@ export class Gateway {
   }
 
   #accept(ws, ip) {
-    const conn = { id: crypto.randomBytes(6).toString("hex"), ws, ip, userId: null, expiresAt: 0, token: null, alive: true };
+    const conn = { id: crypto.randomBytes(6).toString("hex"), ws, ip, userId: null, token: null, alive: true };
     this.conns.add(conn);
     ws.on("pong", () => { conn.alive = true; });
     ws.on("message", (data, isBinary) => this.#onMessage(conn, data, isBinary));
@@ -117,7 +117,9 @@ export class Gateway {
     try {
       if (msg.type === "auth") return this.#auth(conn, msg, reply);
       if (!conn.userId) throw new AppError("UNAUTHORIZED", "Send an auth message first.", 401);
-      if (conn.expiresAt < this.now()) { reply(false, { code: "SESSION_EXPIRED", message: "Your session expired. Sign in again." }); return conn.ws.close(4003, "session expired"); }
+      // re-check on every message: logging out, expiry and bans must end live sockets too, not only future REST calls
+      const live = this.auth.authenticate(conn.token);
+      if (!live || live.id !== conn.userId) { reply(false, { code: "SESSION_EXPIRED", message: "Your session ended. Sign in again." }); return conn.ws.close(4003, "session ended"); }
       reply(true, this.#dispatch(conn, msg));
     } catch (e) {
       if (e instanceof AppError) reply(false, { code: e.code, message: e.message, ...(e.extra || {}) });
@@ -135,7 +137,6 @@ export class Gateway {
     clearTimeout(conn.authTimer);
     conn.userId = user.id;
     conn.token = token;
-    conn.expiresAt = this.auth.db.get("SELECT expires_at FROM sessions WHERE token_hash = ?", crypto.createHash("sha256").update(token).digest("hex"))?.expires_at ?? 0;
     set.add(conn);
     this.byUser.set(user.id, set);
     this.matches.userConnected(user.id);

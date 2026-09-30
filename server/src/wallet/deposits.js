@@ -7,6 +7,7 @@
    top-level transactions and are not seen. Players deposit from a normal wallet (EOA).                             */
 import { ACCT } from "../ledger.js";
 import { toStr } from "../util/amounts.js";
+import { safeMessage } from "../util/errors.js";
 
 const MAX_BLOCKS_PER_PASS = 200;
 
@@ -106,7 +107,7 @@ export class DepositWatcher {
         await this.scanOnce();
         this.lastError = null;
       } catch (e) {
-        this.lastError = String(e.message || e);
+        this.lastError = safeMessage(e); // shown on the public /health, so never the raw RPC error
         this.log.warn("deposit scan failed; will retry", { error: this.lastError });
       } finally {
         this.current = null;

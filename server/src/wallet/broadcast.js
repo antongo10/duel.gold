@@ -1,3 +1,5 @@
+import { safeMessage } from "../util/errors.js";
+
 /* Broadcast a signed raw transaction and classify the outcome.
    - ok: the node has it ("already known" counts: we are re-sending something it already holds)
    - nonceUsed: the sender's nonce is already spent — either this very tx was mined, or something else took the nonce;
@@ -12,8 +14,8 @@ export async function broadcast(provider, raw) {
     const inner = String(e.info?.error?.message || e.error?.message || "");
     if (/already known|known transaction|already imported|already in mempool|tx already exists/i.test(message + " " + inner)) return { ok: true, known: true };
     if (e.code === "NONCE_EXPIRED" || /nonce too low|nonce has already been used|nonce is too low/i.test(message + " " + inner)) {
-      return { ok: false, nonceUsed: true, error: message, code: e.code };
+      return { ok: false, nonceUsed: true, error: safeMessage(e), code: e.code };
     }
-    return { ok: false, error: message, code: e.code };
+    return { ok: false, error: safeMessage(e), code: e.code };
   }
 }

@@ -22,7 +22,7 @@ npm run dev          # local chain + server + a local faucet → http://localhos
 Open `/play/` in two browsers (or one normal and one private window), choose **Continue with a burner wallet** in each, press **Add 1 test ETH**, pick a game and a stake, and **Find opponent**. The page plays the real game packs from `../src/games`.
 
 Other scripts: `npm run chain` starts just the local chain; `npm start` runs the server alone against `RPC_URL`.
-Tests: `npm test` (101 tests, about 50 s, includes real Chromium and a real local chain).
+Tests: `npm test` (104 tests, about 50 s, includes real Chromium and a real local chain).
 
 ### Against Sepolia (or another testnet)
 
@@ -150,7 +150,7 @@ const { match: result } = await c.waitFor("match.result");
 
 ## Security and trust model
 
-What is enforced: signature-verified login with single-use expiring nonces and hashed session tokens · BigInt-only money with a double-entry ledger and idempotency keys · testnet-only chain guard · state compare-and-set on every match transition · payouts only to the sign-in address · input validation everywhere (no string-built SQL) · body, frame and rate limits · origin checks on WebSocket · constant-time admin token check · path-safe static serving with a CSP.
+What is enforced: signature-verified login with single-use expiring nonces and hashed session tokens · sessions re-checked on every WebSocket message (logout, expiry and bans end live sockets) · RPC error text is never exposed or logged raw (providers put API keys in URLs) · BigInt-only money with a double-entry ledger and idempotency keys · testnet-only chain guard · state compare-and-set on every match transition · payouts only to the sign-in address · input validation everywhere (no string-built SQL) · body, frame and rate limits · origin checks on WebSocket · constant-time admin token check · path-safe static serving with a CSP.
 
 What is **not** solved, by design of this prototype:
 

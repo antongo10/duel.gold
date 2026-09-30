@@ -60,7 +60,7 @@ test("sign-in works end to end over REST, and every failure has a stable error c
 
   const n = (await post("/v1/auth/nonce", { address: w.address })).json;
   const sig = await w.signMessage(n.message);
-  assert.equal((await post("/v1/auth/login", { address: w.address, nonce: n.nonce, signature: sig.slice(0, -2) + "00" })).json.error.code, "BAD_SIGNATURE");
+  assert.equal((await post("/v1/auth/login", { address: w.address, nonce: n.nonce, signature: "0x" + (sig[2] === "0" ? "1" : "0") + sig.slice(3) })).json.error.code, "BAD_SIGNATURE"); // flip a nibble of r: a changed v byte can still be a valid signature
   assert.equal((await post("/v1/auth/login", { address: Wallet.createRandom().address, nonce: n.nonce, signature: sig })).json.error.code, "BAD_NONCE");
   const ok = (await post("/v1/auth/login", { address: w.address, nonce: n.nonce, signature: sig })).json;
   assert.match(ok.token, /^dg_/);
@@ -260,9 +260,7 @@ test("WebSocket: origin allow-list applies to browsers; connections per account 
 test("WebSocket: a session that expires stops working on the open socket", async () => {
   const h = await boot();
   const p = await h.player();
-  h.app.db.run("UPDATE sessions SET expires_at = ? WHERE user_id = ?", Date.now() - 1, p.id);
-  // the socket was authenticated before; its recorded expiry is still in the future, so force it to the past
-  for (const c of h.app.gateway.conns) if (c.userId === p.id) c.expiresAt = Date.now() - 1;
+  h.app.db.run("UPDATE sessions SET expires_at = ? WHERE user_id = ?", Date.now() - 1, p.id); // the socket was authenticated earlier
   const closed = new Promise((r) => p.client.on("close", r));
   await assert.rejects(p.client.request("sync"), { code: "SESSION_EXPIRED" });
   assert.equal((await closed).code, 4003);
@@ -274,4 +272,53 @@ test("the client SDK surfaces server errors as typed exceptions", async () => {
   await assert.rejects(p.client.joinQueue({ game: "nope" }), (e) => e.name === "DuelError" && e.code === "UNKNOWN_GAME");
   await assert.rejects(p.client.api("GET", "/v1/matches/xyz"), (e) => e.code === "NOT_FOUND" && e.status === 404);
   await assert.rejects(p.client.waitFor("match.found", null, 100), /timed out waiting/);
+});
+
+/* ------------------------------------------------------------------ security regressions */
+
+test("the public /health never leaks the RPC URL (providers put API keys in it) even when the RPC is failing", async () => {
+  const http = await import("node:http");
+  const { HDNodeWallet } = await import("ethers");
+  // an RPC that reports a valid chain id but fails everything else, at a URL that carries a "secret" key
+  const rpc = http.createServer((req, res) => {
+    let body = "";
+    req.on("data", (d) => (body += d));
+    req.on("end", () => {
+      const m = JSON.parse(body || "{}");
+      res.setHeader("content-type", "application/json");
+      if (m.method === "eth_chainId") return res.end(JSON.stringify({ jsonrpc: "2.0", id: m.id, result: "0x7a69" }));
+      res.statusCode = 500;
+      res.end("upstream exploded");
+    });
+  });
+  await new Promise((r) => rpc.listen(0, "127.0.0.1", r));
+  const secretUrl = `http://127.0.0.1:${rpc.address().port}/v2/SECRETKEY123456`;
+  const logs = [];
+  try {
+  const h = await boot({ chain: { rpcUrl: secretUrl, pollMs: 50 }, keys: { mnemonic: HDNodeWallet.createRandom().mnemonic.phrase }, logLevel: "warn" });
+  h.app.log.warn = (m, f) => logs.push(JSON.stringify({ m, f }));
+  for (let i = 0; i < 60 && !h.app.wallet.deposits.lastError; i++) await sleep(50);
+  assert.ok(h.app.wallet.deposits.lastError, "the scan really is failing");
+  const health = await (await fetch(h.url + "/v1/health")).text();
+  assert.ok(health.includes("lastError"), "the operator still sees that something is wrong");
+  assert.ok(!health.includes("SECRETKEY123456") && !health.includes("/v2/"), `health leaked the RPC URL: ${health}`);
+  assert.ok(!h.app.wallet.deposits.lastError.includes("SECRETKEY123456"));
+  await sleep(150);
+  assert.ok(!logs.join("\n").includes("SECRETKEY123456"), "warnings do not carry the key either");
+  } finally { rpc.close(); }
+});
+
+test("logging out (or being banned) ends live WebSocket sessions, not just future REST calls", async () => {
+  const h = await boot();
+  const a = await h.player();
+  assert.ok(await a.client.request("ping"), "works while signed in");
+  const closed = new Promise((r) => a.client.on("close", r));
+  await a.client.api("POST", "/v1/auth/logout");
+  await assert.rejects(a.client.joinQueue({ game: "aim", stake: String(mETH) }), { code: "SESSION_EXPIRED" }, "a revoked token cannot stake over an open socket");
+  assert.equal((await closed).code, 4003);
+  assert.equal(h.app.db.get("SELECT COUNT(*) AS n FROM tickets WHERE user_id = ?", a.id).n, 0, "nothing was staked");
+
+  const b = await h.player();
+  h.app.db.run("UPDATE users SET banned = 1 WHERE id = ?", b.id);
+  await assert.rejects(b.client.joinQueue({ game: "aim", stake: "0" }), { code: "SESSION_EXPIRED" }, "a banned player is cut off on their live socket");
 });

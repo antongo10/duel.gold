@@ -106,3 +106,18 @@ test("bots give a deterministic ceiling per seed, and only absurd scores look im
   assert.equal(cat.plausibility(g, 4242, -5), null);
   assert.match(cat.plausibility(g, 4242, top * 10), /3× the strongest bot/);
 });
+
+/* ------------------------------------------------------------------ logging */
+
+test("the logger keeps nested errors readable and redacts URLs (RPC URLs carry API keys)", async () => {
+  const { createLogger } = await import("../src/util/log.js");
+  const lines = [];
+  const log = createLogger("info", (l) => lines.push(JSON.parse(l)));
+  log.error("boom", { key: "k", error: new Error("server response 500 (info={ \"requestUrl\": \"https://rpc.example/v2/SECRET\" })") });
+  log.error("plain", new Error("connect to http://user:pw@host:8545/path failed"));
+  const all = JSON.stringify(lines);
+  assert.ok(!all.includes("SECRET") && !all.includes("pw@"), all);
+  assert.match(lines[0].error.message, /server response 500/, "the nested error is still informative");
+  assert.equal(lines[0].key, "k");
+  assert.match(lines[1].err.message, /connect to \[url\] failed/);
+});

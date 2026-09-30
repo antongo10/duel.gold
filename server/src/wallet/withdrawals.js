@@ -14,7 +14,7 @@
    Only this class may send from the treasury key, so it owns the treasury nonce sequence.                          */
 import { Transaction } from "ethers";
 import { ACCT } from "../ledger.js";
-import { AppError, bad, conflict } from "../util/errors.js";
+import { AppError, bad, conflict, safeMessage } from "../util/errors.js";
 import { big, toStr } from "../util/amounts.js";
 import { broadcast } from "./broadcast.js";
 import { checksum } from "../util/address.js";
@@ -101,7 +101,7 @@ export class Withdrawals {
       const stuck = await this.#resendSigned();
       if (!stuck) await this.#signQueued();
     } catch (e) {
-      this.log.warn("withdrawal pass failed; will retry", { error: String(e.message || e) });
+      this.log.warn("withdrawal pass failed; will retry", { error: safeMessage(e) });
     }
   }
 

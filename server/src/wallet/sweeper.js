@@ -5,6 +5,7 @@
 import { Transaction } from "ethers";
 import { broadcast } from "./broadcast.js";
 import { toStr } from "../util/amounts.js";
+import { safeMessage } from "../util/errors.js";
 
 const TRANSFER_GAS = 21000n;
 
@@ -32,7 +33,7 @@ export class Sweeper {
       await this.#settle();
       await this.#sweepNew();
     } catch (e) {
-      this.log.warn("sweep pass failed; will retry", { error: String(e.message || e) });
+      this.log.warn("sweep pass failed; will retry", { error: safeMessage(e) });
     }
   }
 
