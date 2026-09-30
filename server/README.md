@@ -19,10 +19,24 @@ npm install
 npm run dev          # local chain + server + a local faucet → http://localhost:8787/play/
 ```
 
-Open `/play/` in two browsers (or one normal and one private window), choose **Continue with a burner wallet** in each, press **Add 1 test ETH**, pick a game and a stake, and **Find opponent**. The page plays the real game packs from `../src/games`.
+Open <http://localhost:8787/play/> (use `localhost`, not `127.0.0.1`, so wallets see the domain they are asked to sign for) in two browsers. In each, **Connect MetaMask / Phantom** or use a **burner wallet**, press **Add 1 test ETH**, pick a game and a stake, and **Find opponent**. The page plays the real game packs from `../src/games`.
 
 Other scripts: `npm run chain` starts just the local chain; `npm start` runs the server alone against `RPC_URL`.
-Tests: `npm test` (104 tests, about 50 s, includes real Chromium and a real local chain).
+Tests: `npm test` (110 tests, about 55 s, includes real Chromium and a real local chain).
+
+### Connecting MetaMask or Phantom
+
+The page at `/play/` lists every browser wallet it finds and signs you in with it.
+
+- **Discovery** uses EIP-6963, which is how MetaMask and Phantom can both be installed without fighting over `window.ethereum`. Older builds that only set a global (`window.phantom.ethereum`, `window.ethereum`, `window.ethereum.providers`) are picked up too, de-duplicated by provider identity. No wallet installed? You get install links and the burner option.
+- **Signing in** asks the wallet for a `personal_sign` of a short EIP-4361 message: no gas, no transaction. The message names the site's domain and the chain your wallet is on (so wallets show no mismatch warning). Set `PUBLIC_DOMAIN` to the host **with port** exactly as the browser shows it (`duel.example`, or `localhost:8787`; `npm run dev` does this for you).
+- **Deposit from wallet** sends test ETH from the connected wallet to your deposit address with `eth_sendTransaction`. If the wallet is on another network the page offers **Switch network** (`wallet_switchEthereumChain`). Payouts still go only to the address you signed in with.
+- The page follows the wallet: switching account or disconnecting signs you out; switching network updates the page; a reload resumes the session and quietly re-attaches the wallet.
+- **Phantom** is used through its **Ethereum** support (this backend is EVM). Turn on Testnet Mode in Phantom's Developer Settings to reach test networks. Phantom's **Solana** side is not supported: that would need a separate chain integration (ed25519 sign-in, SOL deposits).
+- **The local dev chain** (id 31337) is not built into wallets: add it manually (RPC `http://127.0.0.1:8545`, chain id 31337). Sepolia and the other listed testnets are built in.
+- **Not supported:** WalletConnect / mobile browsers without an in-app wallet, and smart-contract wallets (EIP-1271).
+
+> The real extensions cannot be installed in the headless environment this was built in, so the connect flow is tested in real Chromium against **mock wallets that speak the same EIP-1193 / EIP-6963 protocol** (real signatures verified by the real server, real on-chain deposits). Please try MetaMask and Phantom once yourself; report anything their UIs do differently.
 
 ### Against Sepolia (or another testnet)
 
@@ -115,7 +129,7 @@ Amounts are decimal wei strings, times are epoch milliseconds, errors are `{ "er
 
 | | |
 |---|---|
-| `POST /v1/auth/nonce` `{address}` | get a message to sign |
+| `POST /v1/auth/nonce` `{address, chainId?}` | get a message to sign (`chainId`: the wallet's current chain, shown in the message) |
 | `POST /v1/auth/login` `{address, nonce, signature}` | → `{token, me}` |
 | `POST /v1/auth/logout` | |
 | `GET /v1/config` · `/v1/games` · `/v1/health` · `/v1/leaderboard?game=` | public |
@@ -173,6 +187,7 @@ What is **not** solved, by design of this prototype:
 | `api` | error shapes, admin, CORS/origin, limits, static-file safety, socket abuse |
 | `e2e` | wallet → on-chain deposit → match → on-chain withdrawal → solvency |
 | `browser` | **real Chromium, two players**, funded and withdrawn on-chain; screenshots in `test/shots/` |
+| `wallets.browser` | wallet picker, sign-in with a genuine signature, network switch, deposit from the wallet, account change, reload (mock MetaMask and Phantom) |
 
 The suite itself was checked by mutation: 16 deliberate bugs in money and fairness logic (no fee, inverted winner, no refund, overdraft allowed, seed re-sent, self-matching, ignored loss limit…) were injected; 15 fail the suite and the survivor is an equivalent mutant (a second, redundant guard). That exercise exposed four weak spots in the tests themselves (expected amounts computed by the code under test, no direct test of self-pairing, no test of late submissions, and no check that ratings apply exactly once), all fixed.
 
