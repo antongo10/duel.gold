@@ -44,7 +44,9 @@ export async function startDevStack({ port = 0, chainPort = 0, fresh = false, me
 
   const dbPath = memory ? ":memory:" : path.join(SERVER_ROOT, "data", "dev.db");
   if (fresh && !memory) for (const f of [dbPath, dbPath + "-wal", dbPath + "-shm"]) fs.rmSync(f, { force: true });
+  port = port || (await freePort());
   const config = loadConfig({ NODE_ENV: "development", PORT: String(port), HOST: "127.0.0.1", LOG_LEVEL: quiet ? "silent" : "info" }, {
+    publicDomain: `localhost:${port}`, // what a browser wallet compares with the page it is signing for
     dbPath,
     keys: memory ? { mnemonic: HDNodeWallet.createRandom().mnemonic.phrase } : {},
     chain: { rpcUrl, confirmations: 1, pollMs: 400, sweepIntervalMs: 2000, withdrawIntervalMs: 500 },

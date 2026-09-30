@@ -141,3 +141,35 @@ test("display names: validated, normalised and never address-shaped", async () =
     assert.throws(() => users.setDisplayName(user.id, bad), { code: "BAD_NAME" }, JSON.stringify(bad));
   }
 });
+
+/* ------------------------------------------------------------------ what browser wallets expect */
+
+test("the sign-in message can carry the chain the wallet is on, so MetaMask and Phantom show no mismatch warning", async () => {
+  const { auth } = setup();
+  const w = Wallet.createRandom();
+  assert.match(auth.issueNonce(w.address).message, /Chain ID: 31337\n/, "defaults to the server's chain");
+  const n = auth.issueNonce(w.address, 11155111);
+  assert.match(n.message, /Chain ID: 11155111\n/);
+  assert.match(auth.issueNonce(w.address, "84532").message, /Chain ID: 84532\n/, "numeric strings are fine (JSON from a browser)");
+  // the chain id is informational text in what the user signs; it grants nothing, so any valid id signs in
+  const signature = await w.signMessage(n.message);
+  assert.ok(auth.login({ address: w.address, nonce: n.nonce, signature }).token);
+  for (const bad of [0, -1, 1.5, "abc", "", 2 ** 40, true, {}, [1]]) {
+    assert.throws(() => auth.issueNonce(w.address, bad), { code: "BAD_CHAIN_ID" }, JSON.stringify(bad));
+  }
+});
+
+test("the message domain keeps its port and the URI scheme fits: http for localhost, https otherwise", () => {
+  const w = Wallet.createRandom();
+  const mk = (publicDomain) => {
+    const s = setup();
+    s.config.publicDomain = publicDomain;
+    return s.auth.issueNonce(w.address).message;
+  };
+  const local = mk("localhost:8787");
+  assert.match(local, /^localhost:8787 wants you to sign in/);
+  assert.match(local, /\nURI: http:\/\/localhost:8787\n/);
+  assert.match(mk("127.0.0.1:9000"), /\nURI: http:\/\/127\.0\.0\.1:9000\n/);
+  const prod = mk("duel.example");
+  assert.match(prod, /\nURI: https:\/\/duel\.example\n/);
+});

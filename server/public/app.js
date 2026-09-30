@@ -2,6 +2,7 @@
    Signs in with a wallet, shows the on-chain balance, queues for a real opponent and plays the server-chosen seeded
    challenge with the same game packs the single-player prototype uses. Add ?test=1 to expose window.__duel for tests. */
 import { DuelClient } from "/play/sdk/duel-client.js";
+import { startDiscovery, list as listWallets, onWallets, explain } from "/play/wallets.js";
 
 const { ethers, DG } = window;
 const $ = (s, r = document) => r.querySelector(s);
@@ -15,7 +16,7 @@ const store = {
 
 const S = {
   cfg: null, games: [], client: null, me: null, wallet: null, activity: null,
-  view: "signin", busy: false, error: "",
+  view: "signin", busy: false, error: "", wconn: null, // wconn: the connected browser wallet { id, name, icon, provider, chainId, address }
   pick: { game: "", stake: "0", custom: "", code: "", adult: false },
   queue: null, match: null, result: null, startInfo: null,
   handle: null, myScore: 0, oppScore: 0, submitted: false, confirmForfeit: false, oppFinished: false, oppReady: false, youReady: false,
@@ -29,6 +30,8 @@ const eth = (wei, max = 6) => {
   const cut = f.slice(0, max).replace(/0+$/, "");
   return cut ? `${i}.${cut}` : i;
 };
+const CHAINS = { 1: "Ethereum mainnet", 11155111: "Sepolia", 560048: "Hoodi", 84532: "Base Sepolia", 421614: "Arbitrum Sepolia", 11155420: "OP Sepolia", 80002: "Polygon Amoy", 31337: "the local test chain" };
+const chainName = (id) => (id == null ? "an unknown network" : CHAINS[id] || `chain ${id}`);
 const sym = () => (S.cfg && S.cfg.chain ? S.cfg.chain.symbol : "ETH");
 const left = (t) => { const s = Math.max(0, Math.ceil((Number(t) - (S.client ? S.client.serverNow() : Date.now())) / 1000)); return s >= 60 ? `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}` : `${s}s`; };
 const short = (a) => (a ? `${a.slice(0, 6)}…${a.slice(-4)}` : "");
@@ -67,26 +70,42 @@ function renderTop() {
   const t = $("#topRight");
   if (!S.me) { t.innerHTML = ""; return; }
   const b = S.me.balances;
-  t.innerHTML = `<span class="pill" title="${esc(S.me.address)}"><span class="nm">${esc(S.me.displayName)}</span> <b class="dg-mono">${esc(short(S.me.address))}</b></span>` +
+  t.innerHTML = `<span class="pill" title="${esc(S.me.address)}"><span class="nm">${esc(S.wconn ? S.wconn.name : S.me.displayName)}</span> <b class="dg-mono">${esc(short(S.me.address))}</b></span>` +
     `<span class="pill"><span class="lbl">Balance</span> <b class="dg-mono" id="topBal">${esc(eth(b.available))} ${esc(sym())}</b></span>` +
     `<button class="dg-btn out" data-act="logout">Sign out</button>`;
   if (S.cfg && S.cfg.chain) $("#netTag").textContent = `${S.cfg.chain.name} · test network, no real money`;
+}
+
+/* "Deposit from my wallet": the connected wallet sends test ETH on-chain to the player's deposit address */
+function depositForm() {
+  const c = S.wconn, w = S.wallet, want = w.chain.id, ok = c.chainId === want;
+  return `<form data-form="deposit" class="dg-stack" autocomplete="off">
+    <div class="field"><label for="depAmt">Deposit from ${esc(c.name)} (${esc(sym())}), ${esc(short(c.address))}</label>
+      ${ok
+        ? `<div class="dg-row"><input id="depAmt" type="text" inputmode="decimal" value="0.01" style="flex:1;min-width:120px"><button class="dg-btn" type="submit" id="depBtn">Deposit</button></div>`
+        : `<div class="err" id="wrongChain" role="alert">Your wallet is on ${esc(chainName(c.chainId))}. Switch to ${esc(w.chain.name)} to deposit.</div><div><button class="dg-btn" type="button" data-act="switch-chain" id="switchBtn">Switch to ${esc(w.chain.name)}</button></div>`}
+    </div>
+    <div class="err" id="depErr" role="alert"></div>
+  </form>`;
 }
 
 /* ------------------------------------------------------------------ views */
 
 const VIEWS = {
   signin() {
-    const hasInjected = !!window.ethereum;
+    const wallets = listWallets();
+    const buttons = wallets.map((w) => `<button class="dg-btn wbtn" data-act="wallet" data-id="${esc(w.id)}" data-test="wallet-${esc(w.name.toLowerCase().replace(/[^a-z0-9]+/g, "-"))}">${w.icon ? `<img src="${esc(w.icon)}" alt="" width="24" height="24">` : ""}<span>Connect ${esc(w.name)}</span></button>`).join("");
     return `<section class="dg-box dg-stack">
       <h2 class="dg-h">Play real people. Winner takes the pot.</h2>
       <p class="lede">Stake a little test money on a skill game, get matched with another player, play the same challenge, and the higher score wins the pot minus a 10% fee. Test network only, nothing here has real-world value.</p>
-      <div class="dg-row">
-        <button class="dg-btn primary" data-act="burner" id="signBurner">Continue with a burner wallet</button>
-        ${hasInjected ? `<button class="dg-btn" data-act="injected" id="signInjected">Connect browser wallet</button>` : ""}
-      </div>
-      <p class="dg-note">A burner wallet is a key created and kept in this browser, only used to sign in. Never send real funds to it. Signing in costs no gas and moves no money.</p>
-      <div class="err" id="err">${esc(S.error)}</div>
+      ${wallets.length
+        ? `<div class="wlist" role="group" aria-label="Connect a wallet">${buttons}</div>
+           <p class="dg-note">Signing in only asks your wallet to sign a message: no gas, no funds move. Phantom is used through its Ethereum support; turn on Testnet Mode in its Developer Settings to see test networks.</p>`
+        : `<div class="dg-note" id="noWallet">No browser wallet found. Install <a href="https://metamask.io/download/" target="_blank" rel="noopener">MetaMask</a> or <a href="https://phantom.com/download" target="_blank" rel="noopener">Phantom</a> (use its Ethereum network), then reload this page.</div>`}
+      <div class="or">or</div>
+      <div class="dg-row"><button class="dg-btn${wallets.length ? "" : " primary"}" data-act="burner" id="signBurner">Use a burner wallet (test only)</button></div>
+      <p class="dg-note">A burner wallet is a key created and kept in this browser, only used to sign in. Never send real funds to it.</p>
+      <div class="err" id="err" role="alert">${esc(S.error)}</div>
     </section>`;
   },
 
@@ -138,6 +157,7 @@ const VIEWS = {
           <div class="dg-row"><button class="dg-btn" data-act="copy">Copy address</button>
           ${cfg.devFaucet ? `<button class="dg-btn" data-act="faucet" id="faucetBtn">Add 1 test ${esc(sym())}</button>` : ""}</div>
           <div class="dg-note">Credited after ${w.chain.confirmations} confirmation${w.chain.confirmations > 1 ? "s" : ""}. Payouts go only to your sign-in wallet ${esc(short(w.withdrawTo))}.</div></div>
+        ${S.wconn ? depositForm() : ""}
         <form data-form="withdraw" class="dg-stack" autocomplete="off">
           <div class="field"><label for="wdAmt">Withdraw (${esc(sym())}, min ${eth(w.limits.min)})</label>
           <div class="dg-row"><input id="wdAmt" type="text" inputmode="decimal" placeholder="0.01" style="flex:1;min-width:120px"><button class="dg-btn" type="submit" id="wdBtn">Withdraw</button></div></div>
@@ -309,22 +329,71 @@ function burnerWallet() {
   return new ethers.Wallet(key);
 }
 
-async function signIn(kind) {
+const hexChain = (id) => "0x" + Number(id).toString(16);
+async function walletChainId(provider) {
+  try { return Number(BigInt(await provider.request({ method: "eth_chainId" }))); } catch { return null; }
+}
+
+async function signIn(kind, walletId) {
   S.error = "";
-  let address, sign;
+  let address, sign, chainId = null, conn = null;
   if (kind === "burner") {
     const w = burnerWallet();
     address = w.address; sign = (m) => w.signMessage(m);
   } else {
-    if (!window.ethereum) throw new Error("No browser wallet found.");
-    const signer = await new ethers.BrowserProvider(window.ethereum).getSigner();
-    address = await signer.getAddress(); sign = (m) => signer.signMessage(m);
+    const w = listWallets().find((x) => x.id === walletId);
+    if (!w) throw new Error("That wallet is no longer available. Reload the page.");
+    const accounts = await w.provider.request({ method: "eth_requestAccounts" }); // the wallet asks the player to pick an account
+    if (!Array.isArray(accounts) || !accounts[0]) throw new Error("The wallet did not share an account.");
+    address = ethers.getAddress(accounts[0]);
+    chainId = await walletChainId(w.provider);
+    const signer = await new ethers.BrowserProvider(w.provider).getSigner(address);
+    sign = (m) => signer.signMessage(m); // personal_sign: free, no transaction
+    conn = { id: w.id, name: w.name, icon: w.icon, provider: w.provider, chainId, address };
   }
-  const client = new DuelClient({ baseUrl: location.origin, address, sign, bufferEvents: false });
+  const client = new DuelClient({ baseUrl: location.origin, address, sign, bufferEvents: false, chainId });
   await client.login();
   store.set("dg.token", client.token, "sessionStorage");
   store.set("dg.address", address, "sessionStorage");
+  if (conn) { store.set("dg.wallet", conn.id, "sessionStorage"); attachWallet(conn); } else store.del("dg.wallet", "sessionStorage");
   await startSession(client);
+}
+
+/* follow the wallet: a different account or a dropped connection ends the session, a network switch updates the page */
+function attachWallet(conn) {
+  detachWallet();
+  const p = conn.provider;
+  conn.onAccounts = (accts) => {
+    const now = Array.isArray(accts) && accts[0] ? ethers.getAddress(accts[0]) : null;
+    if (now !== conn.address) { toast("Your wallet switched accounts. Sign in again to use it.", "bad"); signOut(); }
+  };
+  conn.onChain = (hex) => { try { conn.chainId = Number(BigInt(hex)); } catch { conn.chainId = null; } render(true); };
+  conn.onDisconnect = () => { toast("Your wallet disconnected.", "bad"); signOut(); };
+  if (typeof p.on === "function") { p.on("accountsChanged", conn.onAccounts); p.on("chainChanged", conn.onChain); p.on("disconnect", conn.onDisconnect); }
+  S.wconn = conn;
+}
+function detachWallet() {
+  const c = S.wconn;
+  if (c && c.provider) {
+    const off = c.provider.removeListener || c.provider.off;
+    if (typeof off === "function") for (const [ev, fn] of [["accountsChanged", c.onAccounts], ["chainChanged", c.onChain], ["disconnect", c.onDisconnect]]) { try { off.call(c.provider, ev, fn); } catch { /* ignore */ } }
+  }
+  S.wconn = null;
+}
+
+/* after a reload the session token survives but the wallet connection does not; re-attach it quietly (no prompt) */
+async function reattachWallet() {
+  const id = store.get("dg.wallet", "sessionStorage");
+  if (!id || S.wconn || !S.me) return;
+  const w = listWallets().find((x) => x.id === id);
+  if (!w) return; // not announced yet: onWallets calls us again
+  try {
+    const accts = await w.provider.request({ method: "eth_accounts" });
+    if (Array.isArray(accts) && accts[0] && ethers.getAddress(accts[0]) === ethers.getAddress(S.me.address)) {
+      attachWallet({ id: w.id, name: w.name, icon: w.icon, provider: w.provider, chainId: await walletChainId(w.provider), address: ethers.getAddress(S.me.address) });
+      render();
+    }
+  } catch { /* locked wallet: the player can sign in again */ }
 }
 
 async function resume(token) {
@@ -345,6 +414,7 @@ async function startSession(client) {
   applyActive(S.me.active);
   if (TEST) window.__duel = { client, S, get ctx() { return S.handle && S.handle.ctx; } };
   render(true);
+  reattachWallet();
 }
 
 function signOut() {
@@ -353,6 +423,8 @@ function signOut() {
     S.client.close();
   }
   store.del("dg.token", "sessionStorage");
+  store.del("dg.wallet", "sessionStorage");
+  detachWallet();
   Object.assign(S, { client: null, me: null, wallet: null, activity: null, view: "signin", queue: null, match: null, result: null });
   render(true);
 }
@@ -450,8 +522,22 @@ async function act(name, el) {
   const c = S.client;
   try {
     switch (name) {
-      case "burner": case "injected":
-        el.disabled = true; try { await signIn(name); } catch (e) { S.error = e.message; render(true); } break;
+      case "burner": case "wallet":
+        el.disabled = true;
+        if (name === "wallet") el.lastElementChild.textContent = "Check your wallet…";
+        try { await signIn(name, el.dataset.id); } catch (e) { S.error = explain(e); render(true); }
+        break;
+      case "switch-chain": {
+        const c = S.wconn;
+        try {
+          await c.provider.request({ method: "wallet_switchEthereumChain", params: [{ chainId: hexChain(S.wallet.chain.id) }] });
+          c.chainId = await walletChainId(c.provider);
+          render(true);
+        } catch (e) {
+          toast(e && e.code === 4902 ? `Your wallet does not have ${S.wallet.chain.name} yet. Add the network in the wallet, then try again.` : explain(e), "bad");
+        }
+        break;
+      }
       case "logout": signOut(); break;
       case "stake": S.pick.stake = el.dataset.v; render(true); break;
       case "copy":
@@ -525,9 +611,19 @@ document.addEventListener("submit", async (e) => {
   if (!form) return;
   e.preventDefault();
   const kind = form.dataset.form;
-  const err = $(kind === "withdraw" ? "#wdErr" : "#limErr");
+  const err = $({ withdraw: "#wdErr", deposit: "#depErr" }[kind] || "#limErr");
   err.textContent = "";
   try {
+    if (kind === "deposit") {
+      const c = S.wconn, amount = ethers.parseEther(($("#depAmt").value || "0").trim());
+      if (amount <= 0n) throw new Error("Enter an amount above zero.");
+      if (c.chainId !== S.wallet.chain.id) throw new Error(`Switch your wallet to ${S.wallet.chain.name} first.`);
+      $("#depBtn").disabled = true;
+      // a plain transfer to the player's own deposit address; the wallet shows the recipient and amount for approval
+      const hash = await c.provider.request({ method: "eth_sendTransaction", params: [{ from: c.address, to: S.wallet.depositAddress, value: "0x" + amount.toString(16) }] });
+      toast(`Deposit sent (${String(hash).slice(0, 10)}…). It appears after ${S.wallet.chain.confirmations} confirmation${S.wallet.chain.confirmations > 1 ? "s" : ""}.`, "good");
+      return;
+    }
     if (kind === "withdraw") {
       const amount = ethers.parseEther(($("#wdAmt").value || "0").trim());
       const r = await S.client.api("POST", "/v1/wallet/withdraw", { amount: amount.toString() }, { "idempotency-key": crypto.randomUUID() });
@@ -540,7 +636,7 @@ document.addEventListener("submit", async (e) => {
     }
     await refreshMe();
     if (S.wallet) { await refreshWallet(); render(true); }
-  } catch (ex) { err.textContent = ex.message; }
+  } catch (ex) { err.textContent = explain(ex); const b = $("#depBtn"); if (b) b.disabled = false; }
 });
 
 /* countdown labels */
@@ -563,6 +659,12 @@ async function loadPacks(games) {
     });
   }
 }
+
+startDiscovery();
+onWallets(() => {
+  if (S.view === "signin" && !S.client) render(true); // a wallet announced itself late
+  else reattachWallet();
+});
 
 (async function boot() {
   try {

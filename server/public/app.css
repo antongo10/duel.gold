@@ -75,3 +75,10 @@ details.dg-box[open]>summary{margin-bottom:12px}
   .bal .dg-stat b{font-size:17px}
   .vs{grid-template-columns:1fr;gap:4px}
 }
+
+/* wallet picker */
+.wlist{display:grid;gap:10px}
+.wbtn{display:flex;align-items:center;gap:12px;justify-content:flex-start;width:100%;min-height:50px;font-size:15px}
+.wbtn img{border-radius:6px;flex:none}
+.or{color:var(--muted);font-size:13px;text-align:center}
+.lede a,.dg-note a{color:var(--gold-2)}

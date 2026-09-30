@@ -24,21 +24,30 @@ export class Auth {
     this.now = now;
   }
 
-  issueNonce(addressInput) {
+  /* chainIdInput (optional): the chain the wallet is currently on. It only appears in the text the player signs, so
+     wallets do not warn about a chain mismatch; it grants nothing and is not relied on for security. */
+  issueNonce(addressInput, chainIdInput) {
     const address = normalizeAddress(addressInput);
+    let chainId = this.chainId();
+    if (chainIdInput != null) {
+      const n = typeof chainIdInput === "string" && /^\d{1,10}$/.test(chainIdInput) ? Number(chainIdInput) : chainIdInput;
+      if (typeof n !== "number" || !Number.isInteger(n) || n < 1 || n > 4294967295) throw bad("BAD_CHAIN_ID", "chainId must be a positive integer.");
+      chainId = n;
+    }
     const nonce = crypto.randomBytes(16).toString("hex");
     const issued = new Date(this.now());
     const expiresAt = this.now() + this.cfg.auth.nonceTtlMs;
-    const domain = this.cfg.publicDomain;
+    const domain = this.cfg.publicDomain; // host[:port] exactly as the browser shows it: wallets compare it with the page
+    const scheme = /^(localhost|127\.|\[::1\])/i.test(domain) ? "http" : "https";
     const message = [
       `${domain} wants you to sign in with your Ethereum account:`,
       getAddress(address),
       "",
       "Sign in to Duel.gold. This request does not cost gas and cannot move funds.",
       "",
-      `URI: https://${domain}`,
+      `URI: ${scheme}://${domain}`,
       "Version: 1",
-      `Chain ID: ${this.chainId()}`,
+      `Chain ID: ${chainId}`,
       `Nonce: ${nonce}`,
       `Issued At: ${issued.toISOString()}`,
       `Expiration Time: ${new Date(expiresAt).toISOString()}`,

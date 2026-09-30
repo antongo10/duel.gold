@@ -57,7 +57,7 @@ export function registerRoutes(r, app) {
   /* ---------------------------------------------------------------- auth */
 
   r.post("/v1/auth/nonce", { limit: "auth" }, ({ body }) => {
-    const n = auth.issueNonce(body.address);
+    const n = auth.issueNonce(body.address, body.chainId);
     return { nonce: n.nonce, message: n.message, expiresAt: n.expiresAt };
   });
 

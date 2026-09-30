@@ -24,10 +24,11 @@ export class DuelError extends Error {
 }
 
 export class DuelClient {
-  constructor({ baseUrl, address, sign, WebSocketImpl = globalThis.WebSocket, fetchImpl = globalThis.fetch.bind(globalThis), bufferEvents = true }) {
+  constructor({ baseUrl, address, sign, WebSocketImpl = globalThis.WebSocket, fetchImpl = globalThis.fetch.bind(globalThis), bufferEvents = true, chainId = null }) {
     this.baseUrl = baseUrl.replace(/\/+$/, "");
     this.address = address;
     this.sign = sign;
+    this.chainId = chainId; // the wallet's current chain, shown in the sign-in message (optional)
     this.WS = WebSocketImpl;
     this.fetch = fetchImpl;
     this.token = null;
@@ -64,7 +65,7 @@ export class DuelClient {
 
   /* nonce → wallet signature → session token */
   async login() {
-    const { nonce, message } = await this.api("POST", "/v1/auth/nonce", { address: this.address });
+    const { nonce, message } = await this.api("POST", "/v1/auth/nonce", { address: this.address, ...(this.chainId ? { chainId: this.chainId } : {}) });
     const signature = await this.sign(message);
     const out = await this.api("POST", "/v1/auth/login", { address: this.address, nonce, signature });
     this.token = out.token;
