@@ -1,7 +1,7 @@
 /* Duel.gold base tokens + shared components. Single deliberate dark "arena" look.
    Games: use these tokens and dg-* classes; namespace your own classes as .g-<gameid>-* */
 :root{
-  /* Gauld-style theme: near-black warm ground, glassy panels, gold gradient accents, Inter throughout */
+  /* Gauld-style theme: near-black warm ground, glassy panels, gold gradient accents, Outfit throughout */
   --ink:#0A0A0B;        /* page ground */
   --panel:#141415;      /* raised surface */
   --panel-2:#1C1C1E;    /* inputs, chips, tiles */
@@ -22,9 +22,9 @@
   --good:#5AD690;
   --warn:#FFB35C;
   --bad:#FF6275;
-  --f-display:"Inter","SF Pro Display",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-body:"Inter","SF Pro Text",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"Inter","SF Pro Text",system-ui,sans-serif; /* numbers: Inter with tabular figures */
+  --f-display:"Outfit","Inter","SF Pro Display",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Outfit","Inter","SF Pro Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Outfit","Inter","SF Pro Text",system-ui,sans-serif; /* numbers: Outfit with tabular figures */
   --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:999px;
   color-scheme:dark;
 }

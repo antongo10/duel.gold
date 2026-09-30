@@ -1,12 +1,12 @@
 <title>Duel.gold</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800;900&display=swap">
 <style>/* core/base.css */
 /* Duel.gold base tokens + shared components. Single deliberate dark "arena" look.
    Games: use these tokens and dg-* classes; namespace your own classes as .g-<gameid>-* */
 :root{
-  /* Gauld-style theme: near-black warm ground, glassy panels, gold gradient accents, Inter throughout */
+  /* Gauld-style theme: near-black warm ground, glassy panels, gold gradient accents, Outfit throughout */
   --ink:#0A0A0B;        /* page ground */
   --panel:#141415;      /* raised surface */
   --panel-2:#1C1C1E;    /* inputs, chips, tiles */
@@ -27,9 +27,9 @@
   --good:#5AD690;
   --warn:#FFB35C;
   --bad:#FF6275;
-  --f-display:"Inter","SF Pro Display",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-body:"Inter","SF Pro Text",system-ui,-apple-system,"Segoe UI",sans-serif;
-  --f-mono:"Inter","SF Pro Text",system-ui,sans-serif; /* numbers: Inter with tabular figures */
+  --f-display:"Outfit","Inter","SF Pro Display",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-body:"Outfit","Inter","SF Pro Text",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --f-mono:"Outfit","Inter","SF Pro Text",system-ui,sans-serif; /* numbers: Outfit with tabular figures */
   --r-sm:10px; --r-md:14px; --r-lg:20px; --r-pill:999px;
   color-scheme:dark;
 }
@@ -901,6 +901,52 @@ tr.me td{color:var(--gold)}
   .toast{border-radius:20px}
 }
 @media (prefers-reduced-motion:reduce){.cta{transition:none}}
+
+/* ---------- card look: soft bezel, corner glow with pixel grid, inset tiles (ref: glass feature cards) ---------- */
+:root{--card-r:28px;--card-in-r:18px;--card-bg:#111113;--card-in:#0C0C0E;--card-glow:rgba(245,201,74,.20);--card-px:rgba(245,201,74,.55)}
+.dg-box,.hero,.gcard,.wcard,.tcard,.feature{
+  position:relative;isolation:isolate;border-radius:var(--card-r);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 40%),var(--card-bg);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 4px rgba(255,255,255,.015),0 30px 60px -30px rgba(0,0,0,.85);
+}
+/* soft glow bleeding in from a corner; alternates sides like the reference */
+.dg-box::before,.gcard::before,.wcard::before,.tcard::before,.feature::before,.hero::before{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(340px 220px at 0 0,var(--card-glow),transparent 70%);
+}
+/* pixel mosaic inside the glow */
+.dg-box::after,.gcard::after,.wcard::after,.tcard::after,.feature::after{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:.28;background:var(--card-px);
+  -webkit-mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 0 0,#000,transparent 75%);
+  -webkit-mask-composite:source-in,source-in;
+  mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 0 0,#000,transparent 75%);
+  mask-composite:intersect;
+}
+:is(.gcard,.wcard,.tcard,.feature,.dg-box):nth-child(even)::before{background:radial-gradient(340px 220px at 100% 0,var(--card-glow),transparent 70%)}
+:is(.gcard,.wcard,.tcard,.feature,.dg-box):nth-child(even)::after{
+  -webkit-mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 100% 0,#000,transparent 75%);
+  -webkit-mask-composite:source-in,source-in;
+  mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 100% 0,#000,transparent 75%);
+  mask-composite:intersect;
+}
+/* inset tiles read as a recessed inner panel */
+.tstats div,.shop li,.ach li{background:var(--card-in);border-radius:var(--card-in-r);border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+/* headings: larger, lighter weight, tight tracking; body copy muted */
+.box-h h3,.feature h3,.tcard h3,.gcard-name,.wcard-vs b{font-weight:500;letter-spacing:-.025em;color:#F4F4F5}
+.box-h h3,.feature h3,.tcard h3{font-size:24px}
+.gcard-name{font-size:26px}
+.hero-h{font-weight:500;letter-spacing:-.03em}
+.gcard-blurb,.feature p,.tcard p,.hero-sub{color:#8B8B92}
+@media (max-width:720px){
+  :root{--card-r:22px;--card-in-r:14px}
+  .box-h h3,.feature h3,.tcard h3{font-size:21px}
+  .gcard-name{font-size:22px}
+}
+/* small stat tiles share the bezel, without the glow */
+.dg-stat{border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 50%),var(--card-bg);border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 4px rgba(255,255,255,.015),0 20px 40px -24px rgba(0,0,0,.85)}
+.dg-stat b{font-weight:500;letter-spacing:-.02em}
 
 </style>
 <style>/* core/theme-match.css */
@@ -7133,6 +7179,7 @@ select.inp{background-image:none;position:relative;padding-right:40px;
     const $ = (t) => ctx.root.querySelector(`[data-test="${t}"]`);
     const say = makeSay($("msg"), P);
     const C = {
+      font: cssVar(ctx.root, "--f-body", "sans-serif"),
       gold: cssVar(ctx.root, "--gold", "#F2C14E"), bad: cssVar(ctx.root, "--bad", "#FF6275"), good: cssVar(ctx.root, "--good", "#5AD690"),
       ally: cssVar(ctx.root, "--ally", "#6FC3FF"), panel2: cssVar(ctx.root, "--panel-2", "#212440"), panel3: cssVar(ctx.root, "--panel-3", "#2A2E52"),
       line: cssVar(ctx.root, "--line", "#30345A"), ink: cssVar(ctx.root, "--ink", "#10111F"), fg: cssVar(ctx.root, "--fg", "#EEEAF7"), muted: cssVar(ctx.root, "--muted", "#9D9BC0"),
@@ -7182,7 +7229,7 @@ select.inp{background-image:none;position:relative;padding-right:40px;
         const x = sp.x * ts, y = sp.y * ts;
         g.fillStyle = "rgba(255,98,117,.18)"; g.fillRect(x + 2, y + 2, ts - 4, ts - 4);
         g.strokeStyle = C.bad; g.lineWidth = 2; g.strokeRect(x + 3, y + 3, ts - 6, ts - 6);
-        g.fillStyle = C.bad; g.font = `700 ${Math.round(ts * 0.3)}px system-ui,sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillStyle = C.bad; g.font = `700 ${Math.round(ts * 0.3)}px ${C.font}`; g.textAlign = "center"; g.textBaseline = "middle";
         g.fillText("IN", x + ts / 2, y + ts / 2);
       }
       // base core
@@ -7264,7 +7311,7 @@ select.inp{background-image:none;position:relative;padding-right:40px;
         if (type === "arrow") { g.beginPath(); g.moveTo(cx, cy - ts * 0.2); g.lineTo(cx + ts * 0.15, cy + ts * 0.14); g.lineTo(cx - ts * 0.15, cy + ts * 0.14); g.closePath(); g.fill(); }
         else if (type === "cannon") { g.beginPath(); g.arc(cx, cy, ts * 0.16, 0, Math.PI * 2); g.fill(); g.fillRect(cx - ts * 0.05, cy - ts * 0.3, ts * 0.1, ts * 0.2); }
         else if (type === "frost") { g.beginPath(); g.moveTo(cx, cy - ts * 0.22); g.lineTo(cx + ts * 0.17, cy); g.lineTo(cx, cy + ts * 0.22); g.lineTo(cx - ts * 0.17, cy); g.closePath(); g.fill(); }
-        else if (type === "mine") { g.font = `800 ${Math.round(ts * 0.34)}px system-ui,sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("G", cx, cy + 1); }
+        else if (type === "mine") { g.font = `800 ${Math.round(ts * 0.34)}px ${C.font}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("G", cx, cy + 1); }
       }
       if (s && s.maxHp && s.hp < s.maxHp) {
         g.globalAlpha = 1;

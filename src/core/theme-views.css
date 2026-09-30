@@ -203,3 +203,49 @@ tr.me td{color:var(--gold)}
   .toast{border-radius:20px}
 }
 @media (prefers-reduced-motion:reduce){.cta{transition:none}}
+
+/* ---------- card look: soft bezel, corner glow with pixel grid, inset tiles (ref: glass feature cards) ---------- */
+:root{--card-r:28px;--card-in-r:18px;--card-bg:#111113;--card-in:#0C0C0E;--card-glow:rgba(245,201,74,.20);--card-px:rgba(245,201,74,.55)}
+.dg-box,.hero,.gcard,.wcard,.tcard,.feature{
+  position:relative;isolation:isolate;border-radius:var(--card-r);
+  background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 40%),var(--card-bg);
+  border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 4px rgba(255,255,255,.015),0 30px 60px -30px rgba(0,0,0,.85);
+}
+/* soft glow bleeding in from a corner; alternates sides like the reference */
+.dg-box::before,.gcard::before,.wcard::before,.tcard::before,.feature::before,.hero::before{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background:radial-gradient(340px 220px at 0 0,var(--card-glow),transparent 70%);
+}
+/* pixel mosaic inside the glow */
+.dg-box::after,.gcard::after,.wcard::after,.tcard::after,.feature::after{
+  content:"";position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;opacity:.28;background:var(--card-px);
+  -webkit-mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 0 0,#000,transparent 75%);
+  -webkit-mask-composite:source-in,source-in;
+  mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 0 0,#000,transparent 75%);
+  mask-composite:intersect;
+}
+:is(.gcard,.wcard,.tcard,.feature,.dg-box):nth-child(even)::before{background:radial-gradient(340px 220px at 100% 0,var(--card-glow),transparent 70%)}
+:is(.gcard,.wcard,.tcard,.feature,.dg-box):nth-child(even)::after{
+  -webkit-mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 100% 0,#000,transparent 75%);
+  -webkit-mask-composite:source-in,source-in;
+  mask:linear-gradient(90deg,#000 6px,transparent 0) 0 0/9px 9px,linear-gradient(#000 6px,transparent 0) 0 0/9px 9px,radial-gradient(120px 90px at 100% 0,#000,transparent 75%);
+  mask-composite:intersect;
+}
+/* inset tiles read as a recessed inner panel */
+.tstats div,.shop li,.ach li{background:var(--card-in);border-radius:var(--card-in-r);border:1px solid rgba(255,255,255,.06);box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+/* headings: larger, lighter weight, tight tracking; body copy muted */
+.box-h h3,.feature h3,.tcard h3,.gcard-name,.wcard-vs b{font-weight:500;letter-spacing:-.025em;color:#F4F4F5}
+.box-h h3,.feature h3,.tcard h3{font-size:24px}
+.gcard-name{font-size:26px}
+.hero-h{font-weight:500;letter-spacing:-.03em}
+.gcard-blurb,.feature p,.tcard p,.hero-sub{color:#8B8B92}
+@media (max-width:720px){
+  :root{--card-r:22px;--card-in-r:14px}
+  .box-h h3,.feature h3,.tcard h3{font-size:21px}
+  .gcard-name{font-size:22px}
+}
+/* small stat tiles share the bezel, without the glow */
+.dg-stat{border-radius:20px;background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0) 50%),var(--card-bg);border:1px solid rgba(255,255,255,.07);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 0 0 4px rgba(255,255,255,.015),0 20px 40px -24px rgba(0,0,0,.85)}
+.dg-stat b{font-weight:500;letter-spacing:-.02em}

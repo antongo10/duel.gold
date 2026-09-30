@@ -1299,6 +1299,7 @@
     const $ = (t) => ctx.root.querySelector(`[data-test="${t}"]`);
     const say = makeSay($("msg"), P);
     const C = {
+      font: cssVar(ctx.root, "--f-body", "sans-serif"),
       gold: cssVar(ctx.root, "--gold", "#F2C14E"), bad: cssVar(ctx.root, "--bad", "#FF6275"), good: cssVar(ctx.root, "--good", "#5AD690"),
       ally: cssVar(ctx.root, "--ally", "#6FC3FF"), panel2: cssVar(ctx.root, "--panel-2", "#212440"), panel3: cssVar(ctx.root, "--panel-3", "#2A2E52"),
       line: cssVar(ctx.root, "--line", "#30345A"), ink: cssVar(ctx.root, "--ink", "#10111F"), fg: cssVar(ctx.root, "--fg", "#EEEAF7"), muted: cssVar(ctx.root, "--muted", "#9D9BC0"),
@@ -1348,7 +1349,7 @@
         const x = sp.x * ts, y = sp.y * ts;
         g.fillStyle = "rgba(255,98,117,.18)"; g.fillRect(x + 2, y + 2, ts - 4, ts - 4);
         g.strokeStyle = C.bad; g.lineWidth = 2; g.strokeRect(x + 3, y + 3, ts - 6, ts - 6);
-        g.fillStyle = C.bad; g.font = `700 ${Math.round(ts * 0.3)}px system-ui,sans-serif`; g.textAlign = "center"; g.textBaseline = "middle";
+        g.fillStyle = C.bad; g.font = `700 ${Math.round(ts * 0.3)}px ${C.font}`; g.textAlign = "center"; g.textBaseline = "middle";
         g.fillText("IN", x + ts / 2, y + ts / 2);
       }
       // base core
@@ -1430,7 +1431,7 @@
         if (type === "arrow") { g.beginPath(); g.moveTo(cx, cy - ts * 0.2); g.lineTo(cx + ts * 0.15, cy + ts * 0.14); g.lineTo(cx - ts * 0.15, cy + ts * 0.14); g.closePath(); g.fill(); }
         else if (type === "cannon") { g.beginPath(); g.arc(cx, cy, ts * 0.16, 0, Math.PI * 2); g.fill(); g.fillRect(cx - ts * 0.05, cy - ts * 0.3, ts * 0.1, ts * 0.2); }
         else if (type === "frost") { g.beginPath(); g.moveTo(cx, cy - ts * 0.22); g.lineTo(cx + ts * 0.17, cy); g.lineTo(cx, cy + ts * 0.22); g.lineTo(cx - ts * 0.17, cy); g.closePath(); g.fill(); }
-        else if (type === "mine") { g.font = `800 ${Math.round(ts * 0.34)}px system-ui,sans-serif`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("G", cx, cy + 1); }
+        else if (type === "mine") { g.font = `800 ${Math.round(ts * 0.34)}px ${C.font}`; g.textAlign = "center"; g.textBaseline = "middle"; g.fillText("G", cx, cy + 1); }
       }
       if (s && s.maxHp && s.hp < s.maxHp) {
         g.globalAlpha = 1;
